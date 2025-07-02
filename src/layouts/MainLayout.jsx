@@ -16,7 +16,7 @@ function MainLayout({ children, sidebar, rightbar }) {
               {children}
 
               {/* Khoảng trắng để UserStatusCard không che nội dung */}
-              <div className="h-[72px] md:h-0" />
+              <div className="h-[10px] md:h-0" />
 
               {/* UserStatusCard – cố định dưới cùng */}
               <div className="relative w-full max-w-full">

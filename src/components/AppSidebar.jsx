@@ -3,7 +3,7 @@ import { FaHome, FaSearch, FaCompass, FaVideo, FaFacebookMessenger, FaHeart, FaP
 function AppSidebar() {
   return (
     <nav className="flex flex-col gap-2 w-full">
-      <div className="mb-6 px-4">
+      <div className="mb-6 px-4 py-3">
         <span className="font-logo text-3xl hidden md:inline">TienDung</span>
         <span className="font-logo text-3xl md:hidden flex items-center justify-center"><FaHome /></span>
       </div>
