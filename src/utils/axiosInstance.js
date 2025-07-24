@@ -22,10 +22,18 @@ instance.interceptors.response.use(function (response) {
     if (response && response.data) return response.data;
     return response;
 }, function (error) {
-    // Any status codes that falls outside the range of 2xx cause this function to trigger
-    // Do something with response error
-    if (error?.response?.data) return error?.response?.data;
-    return Promise.reject(error);
+    const status = error?.response?.status;
+    const message = error?.response?.data?.message || "";
+
+    // ✅ Token hết hạn hoặc không hợp lệ → xóa token và chuyển về login
+    if (status === 401 && message.toLowerCase().includes("token")) {
+      localStorage.removeItem("access_token");
+      window.location.href = "/login";
+    }
+
+    // Trả lỗi cho component gọi xử lý tiếp
+    return Promise.reject(error?.response?.data || error);
+  
 });
 
 export default instance;

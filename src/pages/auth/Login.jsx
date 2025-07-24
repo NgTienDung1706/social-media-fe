@@ -1,5 +1,8 @@
-import { useState } from "react";
+import { useState , useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { login } from "@/features/auth/authAPI";
+
+import logo3 from "@/assets/logo_cham2.png";
 
 function Login() {
   const [email, setEmail] = useState("");
@@ -7,20 +10,49 @@ function Login() {
   const [error, setError] = useState("");
   const navigate = useNavigate();
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (!email || !password) {
       setError("Vui lòng nhập đầy đủ thông tin.");
       return;
     }
-    setError("");
-    // Xử lý đăng nhập ở đây
-    alert("Đăng nhập thành công!");
+
+    try {
+      const res = await login({ email, password });
+
+      // Lưu token vào localStorage
+      localStorage.setItem("access_token", res.token);
+
+      // (Tuỳ chọn) Lưu thông tin user vào localStorage
+      //localStorage.setItem("user", JSON.stringify(res.user));
+
+      // Chuyển hướng sang trang chủ
+      navigate("/home");
+
+    } catch (err) {
+      console.error("Lỗi khi đăng nhập:", err);
+      setError(err?.message || "Đăng nhập thất bại");
+    }
   };
 
+  useEffect(() => {
+    const token = localStorage.getItem("access_token");
+    if (token) {
+      navigate("/home");
+    }
+  }, []);
+
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-green-400 to-blue-500">
-      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-md">
+  <div className="min-h-screen flex bg-bgr-gradient">
+    {/* Logo bên trái - chiếm 1/3 */}
+    <div className="w-1/3 flex items-center justify-start pl-32">
+      <img src={logo3} alt="CHẠM" className="w-96 h-auto" />
+    </div>
+
+    {/* Form đăng nhập - chiếm 2/3 */}
+    <div className="w-2/3 flex items-center justify-center">
+      <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-xl">
         <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Đăng Nhập</h2>
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
@@ -63,7 +95,9 @@ function Login() {
         </div>
       </div>
     </div>
-  );
+  </div>
+);
+
 }
 
 export default Login;

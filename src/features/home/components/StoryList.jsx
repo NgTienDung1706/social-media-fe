@@ -3,7 +3,13 @@ import StoryItem from "./StoryItem";
 
 function StoryList() {
   return (
-    <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-4 border-b border-gray-200 mb-4 max-w-full">
+    <div className="flex gap-2 sm:gap-4 overflow-x-auto pb-4 border-b border-gray-200 mb-4 max-w-full"
+    style={{
+        WebkitOverflowScrolling: "touch", /* Cuộn mượt trên iOS */
+        scrollbarWidth: "none", /* Firefox */
+        msOverflowStyle: "none", /* Edge/IE */
+      }}
+    >
       {[...Array(8)].map((_, i) => (
         <StoryItem
           key={i}

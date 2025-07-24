@@ -22,6 +22,16 @@ const fakePosts = [
     likes: "2.345",
     comments: "12",
   },
+  {
+    id: 3,
+    avatar: "https://randomuser.me/api/portraits/men/43.jpg",
+    username: "_datis.14_",
+    time: "2 giờ",
+    image: "https://cdn.tgdd.vn/Files/2016/02/25/792452/chup-anh-hoang-hon-bang-smartphone_800x450.jpg",
+    caption: "Hoàng hôn nhớ nhà",
+    likes: "345",
+    comments: "50",
+  },
 ];
 
 function PostList() {
