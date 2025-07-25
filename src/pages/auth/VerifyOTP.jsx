@@ -23,7 +23,7 @@ function VerifyOTP() {
     try {
       await verifyOTP(email, otp);
       // Nếu xác thực thành công, chuyển hướng về trang đăng nhập
-      navigate("/login");
+      navigate("/login", { state: { message: "Xác thực tài khoản thành công! Bạn có thể đăng nhập." } });
     } catch (err) {
       setError(err?.response?.data?.message || "Xác thực OTP thất bại");
     }

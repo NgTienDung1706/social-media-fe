@@ -1,10 +1,11 @@
 import { useState , useEffect } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { login } from "@/features/auth/authAPI";
 
 import logo3 from "@/assets/logo_cham2.png";
 
 function Login() {
+  const location = useLocation();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -54,6 +55,9 @@ function Login() {
     <div className="w-2/3 flex items-center justify-center">
       <div className="bg-white p-8 rounded-xl shadow-lg w-full max-w-xl">
         <h2 className="text-3xl font-bold text-center text-green-600 mb-6">Đăng Nhập</h2>
+        {location.state?.message && (
+          <div className="text-green-500 text-sm text-center mb-2">{location.state.message}</div>
+        )}
         <form onSubmit={handleSubmit} className="space-y-5">
           <div>
             <label className="block text-gray-700 font-semibold mb-2">Email</label>
@@ -91,6 +95,15 @@ function Login() {
             onClick={() => navigate("/register")}
           >
             Đăng ký
+          </button>
+        </div>
+        <div className="mt-2 text-center text-gray-500 text-sm">
+          <button
+            type="button"
+            className="text-blue-600 font-semibold hover:underline bg-transparent border-none outline-none cursor-pointer"
+            onClick={() => navigate("/forgot-password")}
+          >
+            Quên mật khẩu?
           </button>
         </div>
       </div>
