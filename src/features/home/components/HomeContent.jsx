@@ -3,7 +3,7 @@ import PostList from '@/features/posts/components/PostList'
 
 function HomeContent() {
   return (
-    <div className="w-full max-w-full overflow-x-hidden px-2 sm:px-0">
+    <div className="w-full max-w-2xl overflow-x-hidden px-2 sm:px-0">
       {/* Header */}
       {/* <div className="w-full max-w-2xl sticky top-0 z-30 bg-white mb-6">
         <div className="flex items-center justify-between w-full">

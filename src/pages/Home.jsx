@@ -5,14 +5,7 @@ import RightSidebar from "@/features/home/components/RightSidebar";
 
 function Home() {
   return (
-    <MainLayout
-      sidebar={<AppSidebar />}
-      // header={<HomeHeader />}
-      rightbar={<RightSidebar />}
-    >
-      <HomeContent />
-      
-    </MainLayout>
+    <HomeContent />
   );
 }
 
