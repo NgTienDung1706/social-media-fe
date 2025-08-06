@@ -27,6 +27,7 @@ function Login() {
 
       // (Tuỳ chọn) Lưu thông tin user vào localStorage
       //localStorage.setItem("user", JSON.stringify(res.user));
+      localStorage.setItem("username", res.user.username);
 
       // Chuyển hướng sang trang chủ
       navigate("/home");

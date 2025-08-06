@@ -8,6 +8,7 @@ import ResetPassword from "./pages/auth/ResetPassword";
 import Home from "@/pages/Home";
 import Messenger from "@/pages/Messenger";
 import Profile from "@/pages/Profile";
+import ProfileActivity from "@/features/profile/components/ProfileActivity";
 import Explore from "@/pages/Explore";
 import PrivateRoute from "@/routes/PrivateRoute";
 import MainLayout from "@/layouts/MainLayout";
@@ -38,6 +39,7 @@ function AppRouter() {
           </Route>
           <Route element={<MainLayout sidebar={<AppSidebar />} />}>
             <Route path="/profile" element={<Profile />} />
+            <Route path="/profile/:username" element={<ProfileActivity />} />
             <Route path="/messenger" element={<Messenger />} />
             <Route path="/explore" element={<Explore />} />
           </Route>

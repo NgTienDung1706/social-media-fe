@@ -1,4 +1,9 @@
-import axios from "@/utils/axiosInstance";
+import axios from '@/utils/axiosInstance';
+
+// Lấy thông tin profile của user theo id
+export const getUserProfileById = async (userId) => {
+  return axios.get(`/profile/${userId}`);
+};
 
 export const getProfile = async () => {
   return axios.get("/profile");

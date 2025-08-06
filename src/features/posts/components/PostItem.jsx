@@ -29,7 +29,6 @@ function PostItem({ avatar, username, time, imgList, caption, likes, commentCoun
   const safeImgList = useMemo(() => Array.isArray(imgList) ? imgList : [], [imgList]);
   const [current, setCurrent] = useState(0);
   const [maxHeight, setMaxHeight] = useState(0);
-  const [imageRatios, setImageRatios] = useState([]);
   const touchTimeout = useRef(null);
   const isButtonPressed = useRef(false);
   const containerRef = useRef(null);
@@ -89,39 +88,7 @@ function PostItem({ avatar, username, time, imgList, caption, likes, commentCoun
   const handleNext = () => {
     setCurrent((prev) => (prev === safeImgList.length - 1 ? 0 : prev + 1));
   };
-
-  // Tính kích thước khung và lưu tỷ lệ từng ảnh
-  // useEffect(() => {
-  //   if (safeImgList.length > 0) {
-  //     let highest = 0;
-  //     let loaded = 0;
-  //     const ratios = [];
-
-  //     safeImgList.forEach((src, idx) => {
-  //       const img = new Image();
-  //       img.src = src;
-  //       img.onload = () => {
-  //         const ratio = img.height / img.width;
-  //         const scaledHeight = ratio * containerWidth;
-  //         highest = Math.max(highest, scaledHeight);
-  //         ratios[idx] = ratio;
-  //         loaded++;
-  //         if (loaded === safeImgList.length) {
-  //           setMaxHeight(Math.min(highest));
-  //           setImageRatios(ratios);
-  //         }
-  //       };
-  //       img.onerror = () => {
-  //         ratios[idx] = 1;
-  //         loaded++;
-  //         if (loaded === safeImgList.length) {
-  //           setMaxHeight(Math.min(highest || 468, maxPossibleHeight));
-  //           setImageRatios(ratios);
-  //         }
-  //       };
-  //     });
-  //   }
-  // }, [safeImgList]);
+  // Tính toán chiều cao tối đa của ảnh
   useEffect(() => {
     if (safeImgList.length > 0) {
       let highest = 0;
@@ -139,7 +106,7 @@ function PostItem({ avatar, username, time, imgList, caption, likes, commentCoun
           loaded++;
           if (loaded === safeImgList.length) {
             setMaxHeight(Math.min(highest));
-            setImageRatios(ratios);
+            //setImageRatios(ratios);
           }
         };
         img.onerror = () => {
@@ -147,7 +114,7 @@ function PostItem({ avatar, username, time, imgList, caption, likes, commentCoun
           loaded++;
           if (loaded === safeImgList.length) {
             setMaxHeight(Math.min(highest || containerWidth, containerWidth / (4 / 5)));
-            setImageRatios(ratios);
+            //setImageRatios(ratios);
           }
         };
       });

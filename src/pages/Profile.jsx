@@ -6,23 +6,37 @@ import { useNavigate } from "react-router-dom";
 import { FaSteam, FaPlaystation, FaXbox, FaSpotify, FaYoutube, FaDiscord } from "react-icons/fa";
 import UserPostList from '@/features/posts/components/UserPostList';
 
-function Profile() {
-  const [profile, setProfile] = useState(null);
+
+function formatDateDDMMYYYY(dateStr) {
+  if (!dateStr) return '---';
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) return '---';
+  const dd = String(d.getDate()).padStart(2, '0');
+  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  const yyyy = d.getFullYear();
+  return `${dd}/${mm}/${yyyy}`;
+}
+
+function Profile({ isOwnProfile = true, profileData = null }) {
+  const [profile, setProfile] = useState(profileData);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("posts"); // State to manage the active tab
 
   const navigate = useNavigate();
   useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await getProfile();
-        setProfile(res.user);
-      } catch (err) {
-        setError(err?.message || "Đã xảy ra lỗi");
-      }
-    };
-    fetchProfile();
-  }, []);
+    if (!profileData && isOwnProfile) {
+      // Nếu đang xem profile của chính mình -> gọi API getProfile()
+      const fetchProfile = async () => {
+        try {
+          const res = await getProfile();
+          setProfile(res.user);
+        } catch (err) {
+          setError(err?.message || "Đã xảy ra lỗi");
+        }
+      };
+      fetchProfile();
+    }
+  }, [isOwnProfile, profileData]);
 
   if (error) {
     return <div className="text-red-500 text-center mt-4">{error}</div>;
@@ -72,34 +86,43 @@ function Profile() {
           </div>
         </div>
         <div className="flex gap-2 mb-4">
-        <button
-          className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
-          onClick={() => navigate('/edit-profile', {
-            state: {
-              avatar: profile.profile.avatar,
-              username: profile.username,
-              lastname: profile.profile?.lastname,
-              firstname: profile.profile?.firstname,
-              birthday: profile.profile?.birthday,
-              bio: profile.profile?.bio
-            }
-          })}
-        >
-          <FaEdit /> Sửa Hồ Sơ
-        </button>
-          <button className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium">
-            <FaUserFriends />
+        {isOwnProfile ? (
+          <button
+            className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
+            onClick={() => navigate('/edit-profile', {
+              state: {
+                avatar: profile.profile.avatar,
+                username: profile.username,
+                lastname: profile.profile?.lastname,
+                firstname: profile.profile?.firstname,
+                birthday: profile.profile?.birthday,
+                bio: profile.profile?.bio
+              }
+            })}
+          >
+            <FaEdit /> Sửa Hồ Sơ
           </button>
+        ) : (
+          <>
+            <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
+              Kết bạn
+            </button>
+            <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+              Nhắn tin
+            </button>
+          </>
+        )}
         </div>
 
+
         <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
-        <div className="text-sm font-medium mb-4">{profile.profile.birthday ? new Date(profile.profile.birthday).toLocaleDateString('vi-VN') : '---'}</div>
+        <div className="text-sm font-medium mb-4">{formatDateDDMMYYYY(profile.profile.birthday)}</div>
 
         <div className="text-xs text-gray-400 mb-2">Giới thiệu bản thân</div>
         <div className="text-sm font-medium mb-4 whitespace-pre-line">{profile.profile.bio}</div>
 
         <div className="text-xs text-gray-400 mb-2">Gia Nhập Từ</div>
-        <div className="text-sm font-medium mb-4">{profile.createdAt ? new Date(profile.createdAt).toLocaleDateString('vi-VN') : '---'}</div>
+        <div className="text-sm font-medium mb-4">{formatDateDDMMYYYY(profile.createdAt)}</div>
 
       </div>
       {/* Right: Activity & Connections */}
@@ -123,7 +146,7 @@ function Profile() {
         <div className="flex-1 flex flex-col items-center justify-center w-full">
           {tab === 'posts' ? (
             <div className="w-full">
-              <UserPostList />
+              <UserPostList username={!isOwnProfile ? profile.username : undefined} />
             </div>
           ) : (
             <div className="w-full">
