@@ -6,6 +6,7 @@ import ForgotPassWord from "@/pages/auth/ForgotPassWord";
 import ForgotPasswordOTP from "./pages/auth/ForgotPasswordOTP";
 import ResetPassword from "./pages/auth/ResetPassword";
 import Home from "@/pages/Home";
+import HomeRighbar from "@/features/home/components/HomeRighbar";
 import Messenger from "@/pages/Messenger";
 import Profile from "@/pages/Profile";
 import ProfileActivity from "@/features/profile/components/ProfileActivity";
@@ -14,6 +15,8 @@ import PrivateRoute from "@/routes/PrivateRoute";
 import MainLayout from "@/layouts/MainLayout";
 import AppSidebar from "@/components/AppSidebar";
 import EditProfile from "@/pages/EditProfile";
+
+import FullScreenLoader from "@/components/FullScreenLoader";
 
 function AppRouter() {
   return (
@@ -29,13 +32,25 @@ function AppRouter() {
         <Route path="/forgot-password" element={<ForgotPassWord />} />
         <Route path="/forgot-password-otp" element={<ForgotPasswordOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/loading" element={<FullScreenLoader />} />
 
         {/* Group all private routes under PrivateRoute */}
         <Route element={<PrivateRoute />}>
           {/* Home, Messenger, Explore dùng layout mặc định, Profile dùng fullWidth */}
           <Route element={<MainLayout sidebar={<AppSidebar />} maxWidth />}>
-            <Route path="/home" element={<Home />} />
+            {/* <Route path="/home" element={<Home />} /> */}
             <Route path="/edit-profile" element={<EditProfile />} />
+          </Route>
+          <Route
+            element={
+              <MainLayout
+                sidebar={<AppSidebar />}
+                rightbar={<HomeRighbar />}
+                maxWidth
+              />
+            }
+          >
+            <Route path="/home" element={<Home />} />
           </Route>
           <Route element={<MainLayout sidebar={<AppSidebar />} />}>
             <Route path="/profile" element={<Profile />} />

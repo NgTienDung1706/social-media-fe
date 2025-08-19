@@ -1,6 +1,11 @@
 import { useState , useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import isTokenValid from "@/utils/isTokenValid";
+
+
+import { useDispatch } from "react-redux";
 import { login } from "@/features/auth/authAPI";
+import { useSelector } from "react-redux";
 
 import logo3 from "@/assets/logo_cham2.png";
 
@@ -10,6 +15,8 @@ function Login() {
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const token = useSelector((state) => state.auth.login.accessToken);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -20,27 +27,19 @@ function Login() {
     }
 
     try {
-      const res = await login({ email, password });
-
-      // Lưu token vào localStorage
-      localStorage.setItem("access_token", res.token);
-
-      // (Tuỳ chọn) Lưu thông tin user vào localStorage
-      //localStorage.setItem("user", JSON.stringify(res.user));
-      localStorage.setItem("username", res.user.username);
-
+      await login({ email, password }, dispatch);
       // Chuyển hướng sang trang chủ
+
       navigate("/home");
 
     } catch (err) {
-      console.error("Lỗi khi đăng nhập:", err);
+      //console.error("Lỗi khi đăng nhập:", err);
       setError(err?.message || "Đăng nhập thất bại");
     }
   };
 
   useEffect(() => {
-    const token = localStorage.getItem("access_token");
-    if (token) {
+    if (token && isTokenValid(token)) {
       navigate("/home");
     }
   }, []);

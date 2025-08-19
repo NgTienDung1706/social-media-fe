@@ -3,6 +3,7 @@ import logo from "@/assets/Cham_bochu.png";
 import logo2 from "@/assets/logo_cham.png";
 import { useState, useEffect } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { useSelector } from "react-redux";
 import SearchPopup from "./SearchPopup";
 import NotificationsPopup from "./NotificationsPopup";
 import CreatePopup from "./CreatePopup";
@@ -15,18 +16,12 @@ function AppSidebar() {
   const [activeItem, setActiveItem] = useState("");
   const [lastRouteItem, setLastRouteItem] = useState("");
   const [reloadKey, setReloadKey] = useState(0);
-  //const [confirmOpen, setConfirmOpen] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
   const isPopupOpen = searchOpen || notificationsOpen;
-  const currentUser = localStorage.getItem("username");
+  const currentUser = useSelector((state) => state.auth.login.currentUser.username || "");
 
-  // const handleOpenConfirm = () => setConfirmOpen(true);
-  // const handleCloseConfirm = () => setConfirmOpen(false);
-  // const handleConfirmClear = () => {
-  //   localStorage.removeItem("recent_users");
-  //   setConfirmOpen(false);
-  // };
   const [confirmData, setConfirmData] = useState({
     open: false,
     title: "",
@@ -210,7 +205,6 @@ function AppSidebar() {
       <SearchPopup 
         open={searchOpen} 
         onClose={handleCloseSearch}
-        //onOpenConfirmModal={handleOpenConfirm}
         onOpenConfirmModal={() =>
           openConfirm(
             "Xóa tất cả",
