@@ -17,3 +17,11 @@ export const updateProfile = async (formData, dispatch) => {
   dispatch(setCurrentUser(result));
   return result;
 };
+
+export const getFollowingList = async (username, page, limit) => {
+  const res = await axios.get(`/relationship/${username}/following?page=${page}&limit=${limit}`);
+  return {
+    followings: res.followings || [],
+    hasMore: res.hasMore // backend trả về true/false
+  }
+}
