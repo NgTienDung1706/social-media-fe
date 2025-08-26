@@ -3,16 +3,24 @@ import { getProfile } from "@/features/profile/profileAPI";
 import defaultavatar from "@/assets/defaultavatar.png";
 import { FaEdit, FaUserFriends } from "react-icons/fa";
 import { useNavigate } from "react-router-dom";
-import { FaSteam, FaPlaystation, FaXbox, FaSpotify, FaYoutube, FaDiscord } from "react-icons/fa";
-import UserPostList from '@/features/posts/components/UserPostList';
-
+import {
+  FaSteam,
+  FaPlaystation,
+  FaXbox,
+  FaSpotify,
+  FaYoutube,
+  FaDiscord,
+} from "react-icons/fa";
+import { useSelector } from "react-redux";
+import UserPostList from "@/features/posts/components/UserPostList";
+import FollowingList from "@/features/profile/components/FollowingList";
 
 function formatDateDDMMYYYY(dateStr) {
-  if (!dateStr) return '---';
+  if (!dateStr) return "---";
   const d = new Date(dateStr);
-  if (isNaN(d.getTime())) return '---';
-  const dd = String(d.getDate()).padStart(2, '0');
-  const mm = String(d.getMonth() + 1).padStart(2, '0');
+  if (isNaN(d.getTime())) return "---";
+  const dd = String(d.getDate()).padStart(2, "0");
+  const mm = String(d.getMonth() + 1).padStart(2, "0");
   const yyyy = d.getFullYear();
   return `${dd}/${mm}/${yyyy}`;
 }
@@ -21,7 +29,9 @@ function Profile({ isOwnProfile = true, profileData = null }) {
   const [profile, setProfile] = useState(profileData);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("posts"); // State to manage the active tab
+  const [showFollowingList, setShowFollowingList] = useState(false);
 
+  const currentUser = useSelector((state) => state.auth.login.currentUser);
   const navigate = useNavigate();
   useEffect(() => {
     if (!profileData && isOwnProfile) {
@@ -57,22 +67,38 @@ function Profile({ isOwnProfile = true, profileData = null }) {
           />
           <span className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></span>
         </div>
-        <div className="text-xl font-bold mb-5 mt-2 text-center self-center">{`${profile?.profile?.lastname || ""} ${profile?.profile?.firstname || ""}`}</div>
+        <div className="text-xl font-bold mb-5 mt-2 text-center self-center">{`${
+          profile?.profile?.lastname || ""
+        } ${profile?.profile?.firstname || ""}`}</div>
 
         {/* Thống kê số bài viết, số bạn bè */}
         <div className="flex w-full mb-4 mt-2 px-6">
           <div className="flex-1 flex flex-col items-center">
-            <span className="text-lg font-bold text-gray-800">{profile.postCount ?? 0}</span>
+            <span className="text-lg font-bold text-gray-800">
+              {profile.postCount ?? 0}
+            </span>
             <span className="text-xs text-gray-500">Bài viết</span>
           </div>
-          <div className="flex-1 flex flex-col items-center">
-            <span className="text-lg font-bold text-gray-800">{profile.followerCount ?? 0}</span>
+          <div className="flex-1 flex flex-col items-center cursor-pointer">
+            <span className="text-lg font-bold text-gray-800">
+              {profile.followerCount ?? 0}
+            </span>
             <span className="text-xs text-gray-500">Người theo dõi</span>
           </div>
 
-          <div className="flex-1 flex flex-col items-center">
-            <span className="text-lg font-bold text-gray-800">{profile.followingCount ?? 0}</span>
-            <span className="text-xs text-gray-500">Đang theo dõi</span>
+          <div className="flex-1 flex flex-col items-center cursor-pointer">
+            <span
+              className="text-lg font-bold text-gray-800"
+              onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+            >
+              {profile.followingCount ?? 0}
+            </span>
+            <span
+              className="text-xs text-gray-500"
+              onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+            >
+              Đang theo dõi
+            </span>
           </div>
         </div>
 
@@ -80,82 +106,122 @@ function Profile({ isOwnProfile = true, profileData = null }) {
           <div className="text-gray-500 text-sm">{profile.username}</div>
           {/* Icon giới tính */}
           <div className="mb-2">
-            {profile.profile.gender === 'male' && <span title="Nam" className="text-blue-500 text-lg">♂️</span>}
-            {profile.profile.gender === 'female' && <span title="Nữ" className="text-pink-500 text-lg">♀️</span>}
-            {(!profile.profile.gender || (profile.profile.gender !== 'male' && profile.profile.gender !== 'female')) && <span title="Khác" className="text-gray-400 text-lg">⚧️</span>}
+            {profile.profile.gender === "male" && (
+              <span title="Nam" className="text-blue-500 text-lg">
+                ♂️
+              </span>
+            )}
+            {profile.profile.gender === "female" && (
+              <span title="Nữ" className="text-pink-500 text-lg">
+                ♀️
+              </span>
+            )}
+            {(!profile.profile.gender ||
+              (profile.profile.gender !== "male" &&
+                profile.profile.gender !== "female")) && (
+              <span title="Khác" className="text-gray-400 text-lg">
+                ⚧️
+              </span>
+            )}
           </div>
         </div>
         <div className="flex gap-2 mb-4">
-        {isOwnProfile ? (
-          <button
-            className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
-            onClick={() => navigate('/edit-profile', {
-              state: {
-                avatar: profile.profile.avatar,
-                username: profile.username,
-                lastname: profile.profile?.lastname,
-                firstname: profile.profile?.firstname,
-                birthday: profile.profile?.birthday,
-                bio: profile.profile?.bio
+          {isOwnProfile ? (
+            <button
+              className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
+              onClick={() =>
+                navigate("/edit-profile", {
+                  state: {
+                    avatar: profile.profile.avatar,
+                    username: profile.username,
+                    lastname: profile.profile?.lastname,
+                    firstname: profile.profile?.firstname,
+                    birthday: profile.profile?.birthday,
+                    bio: profile.profile?.bio,
+                  },
+                })
               }
-            })}
-          >
-            <FaEdit /> Sửa Hồ Sơ
-          </button>
-        ) : (
-          <>
-            <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
-              Kết bạn
+            >
+              <FaEdit /> Sửa Hồ Sơ
             </button>
-            <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
-              Nhắn tin
-            </button>
-          </>
-        )}
+          ) : (
+            <>
+              <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
+                Kết bạn
+              </button>
+              <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+                Nhắn tin
+              </button>
+            </>
+          )}
         </div>
 
-
         <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
-        <div className="text-sm font-medium mb-4">{formatDateDDMMYYYY(profile.profile.birthday)}</div>
+        <div className="text-sm font-medium mb-4">
+          {formatDateDDMMYYYY(profile.profile.birthday)}
+        </div>
 
         <div className="text-xs text-gray-400 mb-2">Giới thiệu bản thân</div>
-        <div className="text-sm font-medium mb-4 whitespace-pre-line">{profile.profile.bio}</div>
+        <div className="text-sm font-medium mb-4 whitespace-pre-line">
+          {profile.profile.bio}
+        </div>
 
         <div className="text-xs text-gray-400 mb-2">Gia Nhập Từ</div>
-        <div className="text-sm font-medium mb-4">{formatDateDDMMYYYY(profile.createdAt)}</div>
-
+        <div className="text-sm font-medium mb-4">
+          {formatDateDDMMYYYY(profile.createdAt)}
+        </div>
       </div>
       {/* Right: Activity & Connections */}
       <div className="md:w-2/3 w-full bg-white rounded-2xl shadow-lg p-8 flex flex-col h-auto justify-center">
         {/* Tabs */}
         <div className="border-b border-gray-300 pb-2 mb-4 flex gap-6">
           <button
-            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${tab === 'posts' ? 'text-blue-600 border-blue-600' : 'text-gray-800 border-transparent'}`}
-            onClick={() => setTab('posts')}
+            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${
+              tab === "posts"
+                ? "text-blue-600 border-blue-600"
+                : "text-gray-800 border-transparent"
+            }`}
+            onClick={() => setTab("posts")}
           >
             Bài viết
           </button>
           <button
-            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${tab === 'albums' ? 'text-blue-600 border-blue-600' : 'text-gray-800 border-transparent'}`}
-            onClick={() => setTab('albums')}
+            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${
+              tab === "albums"
+                ? "text-blue-600 border-blue-600"
+                : "text-gray-800 border-transparent"
+            }`}
+            onClick={() => setTab("albums")}
           >
             Album
           </button>
         </div>
         {/* Tab content */}
         <div className="flex-1 flex flex-col items-center justify-center w-full">
-          {tab === 'posts' ? (
+          {tab === "posts" ? (
             <div className="w-full">
-              <UserPostList username={!isOwnProfile ? profile.username : undefined} />
+              <UserPostList
+                username={!isOwnProfile ? profile.username : undefined}
+              />
             </div>
           ) : (
             <div className="w-full">
               {/* Danh sách album - thay thế bằng component hoặc map dữ liệu thực tế */}
-              <div className="text-gray-500 text-center">Chưa có album nào.</div>
+              <div className="text-gray-500 text-center">
+                Chưa có album nào.
+              </div>
             </div>
           )}
         </div>
       </div>
+
+      {/* FollowingList modal */}
+      {showFollowingList && (
+        <FollowingList 
+          username={isOwnProfile ? currentUser.username : profile.username} 
+          onClose={() => setShowFollowingList(false)} 
+        />
+      )}
     </div>
   );
 }

@@ -47,7 +47,7 @@ function UserPostList({ username }) {
         if (resetFlag) {
           // Lấy trang đầu tiên khi đổi username
           const data = await getUserPosts(username, 1, 3);
-          //console.log("API page 1:", data);
+          // console.log("API page 1:", data);
           setPosts(Array.isArray(data.posts) ? data.posts : []);
           setHasMore(data.hasMore);
           setResetFlag(false);
