@@ -14,6 +14,7 @@ import {
 import { useSelector } from "react-redux";
 import UserPostList from "@/features/posts/components/UserPostList";
 import FollowingList from "@/features/profile/components/FollowingList";
+import FollowerList from "@/features/profile/components/FollowerList";
 
 function formatDateDDMMYYYY(dateStr) {
   if (!dateStr) return "---";
@@ -30,6 +31,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
   const [error, setError] = useState("");
   const [tab, setTab] = useState("posts"); // State to manage the active tab
   const [showFollowingList, setShowFollowingList] = useState(false);
+  const [showFollowerList, setShowFollowerList] = useState(false);
 
   const currentUser = useSelector((state) => state.auth.login.currentUser);
   const navigate = useNavigate();
@@ -80,10 +82,18 @@ function Profile({ isOwnProfile = true, profileData = null }) {
             <span className="text-xs text-gray-500">Bài viết</span>
           </div>
           <div className="flex-1 flex flex-col items-center cursor-pointer">
-            <span className="text-lg font-bold text-gray-800">
+            <span
+              className="text-lg font-bold text-gray-800"
+              onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+            >
               {profile.followerCount ?? 0}
             </span>
-            <span className="text-xs text-gray-500">Người theo dõi</span>
+            <span
+              className="text-xs text-gray-500"
+              onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+            >
+              Người theo dõi
+            </span>
           </div>
 
           <div className="flex-1 flex flex-col items-center cursor-pointer">
@@ -217,9 +227,16 @@ function Profile({ isOwnProfile = true, profileData = null }) {
 
       {/* FollowingList modal */}
       {showFollowingList && (
-        <FollowingList 
-          username={isOwnProfile ? currentUser.username : profile.username} 
-          onClose={() => setShowFollowingList(false)} 
+        <FollowingList
+          username={isOwnProfile ? currentUser.username : profile.username}
+          onClose={() => setShowFollowingList(false)}
+        />
+      )}
+      {/* FollowerList modal */}
+      {showFollowerList && (
+        <FollowerList
+          username={isOwnProfile ? currentUser.username : profile.username}
+          onClose={() => setShowFollowerList(false)}
         />
       )}
     </div>

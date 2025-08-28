@@ -1,11 +1,8 @@
-
 import { useState, useEffect } from "react";
 import { AiOutlineClose } from "react-icons/ai";
 import { ImSpinner2 } from "react-icons/im";
-import { searchUsers } from '@/features/search/searchAPI';
+import { searchUsers } from "@/features/search/searchAPI";
 import { useNavigate } from "react-router-dom";
-
-
 
 function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
   const [query, setQuery] = useState("");
@@ -65,7 +62,7 @@ function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
     try {
       const res = await searchUsers(text);
       setUsers(res.users || []);
-    } catch (err) {
+    } catch {
       setUsers([]);
     } finally {
       setLoading(false);
@@ -96,7 +93,11 @@ function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
     <div
       className={`fixed top-0 left-20 h-screen w-80 bg-white shadow-lg border-r border-gray-200 z-50
       transform transition-transform duration-300 ease-in-out
-      ${open ? "translate-x-0" : "-translate-x-full pointer-events-none opacity-0"}`}
+      ${
+        open
+          ? "translate-x-0"
+          : "-translate-x-full pointer-events-none opacity-0"
+      }`}
     >
       <div className="flex justify-between items-center p-4 border-b">
         <h2 className="text-lg font-semibold">Tìm kiếm</h2>
@@ -126,7 +127,7 @@ function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
 
       {/* Danh sách kết quả */}
       <div className="px-4">
-         {/* Hiển thị kết quả tìm kiếm */}
+        {/* Hiển thị kết quả tìm kiếm */}
         {query.trim() !== "" && (
           <>
             {users.length > 0 ? (
@@ -137,7 +138,7 @@ function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
                     onClick={() => {
                       saveRecentUser(user);
                       navigate(`/profile/${user.username}`);
-                     onClose(); // đóng popup sau khi điều hướng
+                      onClose(); // đóng popup sau khi điều hướng
                     }}
                     className="flex items-center py-2 gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded"
                   >
@@ -180,10 +181,10 @@ function SearchPopup({ open, onClose, onOpenConfirmModal, reloadKey }) {
                 <li
                   key={user._id}
                   onClick={() => {
-                      saveRecentUser(user);
-                      navigate(`/profile/${user.username}`);
-                     onClose(); // đóng popup sau khi điều hướng
-                    }}
+                    saveRecentUser(user);
+                    navigate(`/profile/${user.username}`);
+                    onClose(); // đóng popup sau khi điều hướng
+                  }}
                   className="flex items-center py-2 gap-3 cursor-pointer hover:bg-gray-50 p-2 rounded"
                 >
                   <img

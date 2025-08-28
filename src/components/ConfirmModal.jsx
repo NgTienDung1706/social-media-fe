@@ -18,19 +18,21 @@ function ConfirmModal({
         {title && <h3 className="text-xl font-semibold mb-3">{title}</h3>}
 
         {/* Nội dung */}
-        <p className="text-base text-gray-700 mb-6 leading-relaxed">{message}</p>
+        <p className="text-base text-gray-700 mb-6 leading-relaxed">
+          {message}
+        </p>
 
         {/* Nút */}
         <div className="flex justify-center gap-4">
           <button
             onClick={onConfirm}
-            className="px-5 py-2 text-base bg-red-500 text-white rounded-lg hover:bg-red-600 transition duration-200"
+            className="px-5 py-2 text-base bg-brand-green text-white rounded-lg transition duration-200 cursor-pointer hover:bg-green-600 focus:outline-none focus:ring-2 focus:ring-green-500 focus:ring-offset-2"
           >
             {confirmText}
           </button>
           <button
             onClick={onCancel}
-            className="px-5 py-2 text-base bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200"
+            className="px-5 py-2 text-base bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition duration-200 cursor-pointer focus:outline-none focus:ring-2 focus:ring-gray-400 focus:ring-offset-2"
           >
             {cancelText}
           </button>

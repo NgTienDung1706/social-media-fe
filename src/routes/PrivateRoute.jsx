@@ -1,13 +1,12 @@
 // src/routes/PrivateRoute.jsx
 import { Navigate, Outlet } from "react-router-dom";
-import { useSelector, useDispatch  } from "react-redux";
+import { useSelector, useDispatch } from "react-redux";
 import { useEffect, useState } from "react";
 import axios from "axios";
 import { setAccessToken, logoutSuccess } from "@/redux/authSlice";
 import isTokenValid from "@/utils/isTokenValid";
 
 import FullScreenLoader from "@/components/FullScreenLoader";
-
 
 function PrivateRoute() {
   const dispatch = useDispatch();
@@ -31,7 +30,7 @@ function PrivateRoute() {
           );
           dispatch(setAccessToken(res.data.accessToken));
           setIsAuthenticated(true);
-        } catch (err) {
+        } catch {
           dispatch(logoutSuccess());
           setIsAuthenticated(false);
         } finally {
@@ -48,8 +47,6 @@ function PrivateRoute() {
   }
 
   return isAuthenticated ? <Outlet /> : <Navigate to="/login" replace />;
-
-
 
   //return reduxToken && isTokenValid(reduxToken) ? <Outlet /> : <Navigate to="/login" replace />;
 }

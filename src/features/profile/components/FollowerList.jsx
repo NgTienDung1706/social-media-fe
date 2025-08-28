@@ -1,12 +1,11 @@
 import React, { useEffect, useState, useRef, useCallback } from "react";
-//import axios from "@/utils/axiosInstance";
-import { getFollowingList } from "@/features/profile/profileAPI";
+import { getFollowerList } from "@/features/profile/profileAPI";
 import FollowItem from "./FollowItem";
 
-const FollowingList = ({ username, onClose }) => {
-  const [following, setFollowing] = useState([]);
+const FollowerList = ({ username, onClose }) => {
+  const [followers, setFollowers] = useState([]);
   const [search, setSearch] = useState("");
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
   const [resetFlag, setResetFlag] = useState(false);
@@ -81,7 +80,7 @@ const FollowingList = ({ username, onClose }) => {
   );
 
   useEffect(() => {
-    setFollowing([]);
+    setFollowers([]);
     setPage(1);
     setHasMore(true);
     setResetFlag(true);
@@ -93,23 +92,23 @@ const FollowingList = ({ username, onClose }) => {
       try {
         setLoading(true);
         if (resetFlag) {
-          const res = await getFollowingList(username, 1, 10);
-          setFollowing(Array.isArray(res.followings) ? res.followings : []);
+          const res = await getFollowerList(username, 1, 10);
+          setFollowers(Array.isArray(res.followers) ? res.followers : []);
           setHasMore(res.hasMore);
           setResetFlag(false);
           return;
         }
         if (page > 1) {
-          const res = await getFollowingList(username, page, 10);
-          setFollowing((prev) => [
+          const res = await getFollowerList(username, page, 10);
+          setFollowers((prev) => [
             ...prev,
-            ...(Array.isArray(res.followings) ? res.followings : []),
+            ...(Array.isArray(res.followers) ? res.followers : []),
           ]);
           setHasMore(res.hasMore);
         }
       } catch (err) {
         console.error("Error fetching following list:", err);
-        setFollowing([]);
+        setFollowers([]);
       } finally {
         setLoading(false);
       }
@@ -117,24 +116,7 @@ const FollowingList = ({ username, onClose }) => {
     fetchFollowing();
   }, [username, page, hasMore, resetFlag]);
 
-  // const handleUnfollow = async (followingId) => {
-  //   await axios.delete(`/profile/${username}/following/${followingId}`);
-  //   setFollowing((prev) =>
-  //     prev.map((u) =>
-  //       u._id === followingId
-  //         ? {
-  //             ...u,
-  //             relationship_status: {
-  //               ...u.relationship_status,
-  //               following: false,
-  //             },
-  //           }
-  //         : u
-  //     )
-  //   );
-  // };
-
-  const filtered = following.filter((u) => {
+  const filtered = followers.filter((u) => {
     const fullName = `${u.lastname} ${u.firstname}`.toLowerCase();
     return (
       u.username.toLowerCase().includes(search.toLowerCase()) ||
@@ -160,7 +142,7 @@ const FollowingList = ({ username, onClose }) => {
           ×
         </button>
         <h2 className="text-center text-lg font-semibold mb-2">
-          Đang theo dõi
+          Người theo dõi
         </h2>
         <input
           type="text"
@@ -184,7 +166,7 @@ const FollowingList = ({ username, onClose }) => {
                 key={user._id}
                 user={user}
                 ref={isLast ? lastPostRef : null}
-                mode="following"
+                mode="follower"
               />
             );
           })}
@@ -195,4 +177,4 @@ const FollowingList = ({ username, onClose }) => {
   );
 };
 
-export default FollowingList;
+export default FollowerList;
