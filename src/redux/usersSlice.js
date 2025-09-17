@@ -2,56 +2,46 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import axiosInstance from "@/utils/axiosInstance";
 
-export const fetchUserById = createAsyncThunk(
-  "users/fetchUserById",
-  async (userId) => {
-    const res = await axiosInstance.get(`/userinfo/${userId}`);
-    return res; // {id, name, bio, avatar, postsCount}
+// Async thunk: lấy thông tin user theo ID
+export const fetchUserByUsername = createAsyncThunk(
+  "users/fetchUserByUsername",
+  async (username, { rejectWithValue }) => {
+    try {
+      const res = await axiosInstance.get(`/profile/${username}`);
+      return res.user; // { id, name, bio, avatar, postsCount, ... }
+    } catch (err) {
+      return rejectWithValue(err.message || "Fetch user failed");
+    }
   }
 );
 
 const usersSlice = createSlice({
   name: "users",
   initialState: {
-    listUser: {}, // { userId: {...} }
+    entities: {}, // { userId: userData }
+    status: {}, // { userId: "idle" | "loading" | "succeeded" | "failed" }
+    error: {}, // { userId: errorMessage }
   },
   reducers: {},
   extraReducers: (builder) => {
-    builder.addCase(fetchUserById.fulfilled, (state, action) => {
-      const user = action.payload;
-      state.entities[user.id] = user;
-    });
+    builder
+      .addCase(fetchUserByUsername.pending, (state, action) => {
+        const username = action.meta.arg;
+        // Tạm set theo username để tránh lỗi khi chưa biết userId
+        state.status[username] = "loading";
+      })
+      .addCase(fetchUserByUsername.fulfilled, (state, action) => {
+        const user = action.payload;
+        state.entities[user._id] = user;
+        state.status[user._id] = "succeeded";
+        delete state.status[user.username]; // xóa status tạm theo username
+      })
+      .addCase(fetchUserByUsername.rejected, (state, action) => {
+        const username = action.meta.arg;
+        state.status[username] = "failed";
+        state.error[username] = action.payload;
+      });
   },
 });
 
 export default usersSlice.reducer;
-
-
-
-// src/redux/usersSlice.js
-// import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-// import axiosInstance from "@/utils/axiosInstance";
-
-// export const fetchUserById = createAsyncThunk(
-//   "users/fetchUserById",
-//   async (userId) => {
-//     const res = await axiosInstance.get(`/users/${userId}`);
-//     return res; // {id, name, bio, avatar, postsCount}
-//   }
-// );
-
-// const usersSlice = createSlice({
-//   name: "users",
-//   initialState: {
-//     entities: {}, // { userId: {...} }
-//   },
-//   reducers: {},
-//   extraReducers: (builder) => {
-//     builder.addCase(fetchUserById.fulfilled, (state, action) => {
-//       const user = action.payload;
-//       state.entities[user.id] = user;
-//     });
-//   },
-// });
-
-// export default usersSlice.reducer;

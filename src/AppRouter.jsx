@@ -16,6 +16,8 @@ import MainLayout from "@/layouts/MainLayout";
 import AppSidebar from "@/components/AppSidebar";
 import EditProfile from "@/pages/EditProfile";
 
+import DemoComponent from "@/components/DemoComponent";
+
 import FullScreenLoader from "@/components/FullScreenLoader";
 
 function AppRouter() {
@@ -32,7 +34,7 @@ function AppRouter() {
         <Route path="/forgot-password" element={<ForgotPassWord />} />
         <Route path="/forgot-password-otp" element={<ForgotPasswordOTP />} />
         <Route path="/reset-password" element={<ResetPassword />} />
-        <Route path="/loading" element={<FullScreenLoader />} />
+        <Route path="/test" element={<DemoComponent />} />
 
         {/* Group all private routes under PrivateRoute */}
         <Route element={<PrivateRoute />}>

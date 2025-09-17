@@ -49,7 +49,7 @@ function convertEmotionToEnglish(label) {
   }
 }
 
-export default function CreatePopup({ open, onClose }) {
+export default function CreatePost({ open, onClose }) {
   const [images, setImages] = useState([]);
   const [currentImg, setCurrentImg] = useState(0);
   const [caption, setCaption] = useState("");

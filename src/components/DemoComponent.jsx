@@ -49,7 +49,7 @@ function convertEmotionToEnglish(label) {
   }
 }
 
-export default function CreatePopup({ open, onClose }) {
+export default function CreatePost() {
   const [images, setImages] = useState([]);
   const [currentImg, setCurrentImg] = useState(0);
   const [caption, setCaption] = useState("");
@@ -58,8 +58,6 @@ export default function CreatePopup({ open, onClose }) {
   const [showTagPopup, setShowTagPopup] = useState(false);
   const [taggedUsers, setTaggedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-
-  if (!open) return null;
 
   const emotionList = [
     { label: "hạnh phúc", icon: "😊" },
@@ -155,7 +153,7 @@ export default function CreatePopup({ open, onClose }) {
       <div className="bg-white rounded-xl shadow-lg flex w-[900px] h-[600px] overflow-hidden flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-4 py-2">
-          <button className="text-xl" onClick={onClose}>
+          <button className="text-xl" onClick={() => console.log("Quay lại")}>
             ←
           </button>
           <span className="font-semibold text-sm">Tạo bài viết mới</span>

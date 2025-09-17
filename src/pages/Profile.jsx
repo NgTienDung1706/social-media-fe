@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import StickyBox from "react-sticky-box";
 import { getProfile } from "@/features/profile/profileAPI";
 import defaultavatar from "@/assets/defaultavatar.png";
 import { FaEdit, FaUserFriends } from "react-icons/fa";
@@ -58,131 +59,137 @@ function Profile({ isOwnProfile = true, profileData = null }) {
   }
 
   return (
-    <div className="w-full min-h-screen bg-white flex flex-col md:flex-row items-stretch justify-center">
+    <div className="w-full min-h-screen bg-white flex flex-row justify-center gap-8">
       {/* Left: Profile Card */}
-      <div className="md:w-1/3 w-full bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start relative md:mr-8 h-auto justify-start sticky top-4 self-start">
-        <div className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center relative mb-2 self-center">
-          <img
-            src={profile.profile.avatar || defaultavatar}
-            alt="Avatar"
-            className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
-          />
-          <span className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></span>
-        </div>
-        <div className="text-xl font-bold mb-5 mt-2 text-center self-center">{`${
-          profile?.profile?.lastname || ""
-        } ${profile?.profile?.firstname || ""}`}</div>
+      <div className="w-[350px]">
+        <StickyBox offsetTop={40} offsetBottom={20}>
+          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start">
+            <div className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center relative mb-2 self-center">
+              <img
+                src={profile.profile.avatar || defaultavatar}
+                alt="Avatar"
+                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
+              />
+              <span className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></span>
+            </div>
+            <div className="text-xl font-bold mb-5 mt-2 text-center self-center">{`${
+              profile?.profile?.lastname || ""
+            } ${profile?.profile?.firstname || ""}`}</div>
 
-        {/* Thống kê số bài viết, số bạn bè */}
-        <div className="flex w-full mb-4 mt-2 px-6">
-          <div className="flex-1 flex flex-col items-center">
-            <span className="text-lg font-bold text-gray-800">
-              {profile.postCount ?? 0}
-            </span>
-            <span className="text-xs text-gray-500">Bài viết</span>
+            {/* Thống kê số bài viết, số bạn bè */}
+            <div className="flex w-full mb-4 mt-2 px-6">
+              <div className="flex-1 flex flex-col items-center">
+                <span className="text-lg font-bold text-gray-800">
+                  {profile.postCount ?? 0}
+                </span>
+                <span className="text-xs text-gray-500">Bài viết</span>
+              </div>
+              <div className="flex-1 flex flex-col items-center cursor-pointer">
+                <span
+                  className="text-lg font-bold text-gray-800"
+                  onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+                >
+                  {profile.followerCount ?? 0}
+                </span>
+                <span
+                  className="text-xs text-gray-500"
+                  onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+                >
+                  Người theo dõi
+                </span>
+              </div>
+
+              <div className="flex-1 flex flex-col items-center cursor-pointer">
+                <span
+                  className="text-lg font-bold text-gray-800"
+                  onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+                >
+                  {profile.followingCount ?? 0}
+                </span>
+                <span
+                  className="text-xs text-gray-500"
+                  onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+                >
+                  Đang theo dõi
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 mb-2">
+              <div className="text-gray-500 text-sm">{profile.username}</div>
+              {/* Icon giới tính */}
+              <div className="mb-2">
+                {profile.profile.gender === "male" && (
+                  <span title="Nam" className="text-blue-500 text-lg">
+                    ♂️
+                  </span>
+                )}
+                {profile.profile.gender === "female" && (
+                  <span title="Nữ" className="text-pink-500 text-lg">
+                    ♀️
+                  </span>
+                )}
+                {(!profile.profile.gender ||
+                  (profile.profile.gender !== "male" &&
+                    profile.profile.gender !== "female")) && (
+                  <span title="Khác" className="text-gray-400 text-lg">
+                    ⚧️
+                  </span>
+                )}
+              </div>
+            </div>
+            <div className="flex gap-2 mb-4">
+              {isOwnProfile ? (
+                <button
+                  className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
+                  onClick={() =>
+                    navigate("/edit-profile", {
+                      state: {
+                        avatar: profile.profile.avatar,
+                        username: profile.username,
+                        lastname: profile.profile?.lastname,
+                        firstname: profile.profile?.firstname,
+                        birthday: profile.profile?.birthday,
+                        bio: profile.profile?.bio,
+                      },
+                    })
+                  }
+                >
+                  <FaEdit /> Sửa Hồ Sơ
+                </button>
+              ) : (
+                <>
+                  <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
+                    Kết bạn
+                  </button>
+                  <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+                    Nhắn tin
+                  </button>
+                </>
+              )}
+            </div>
+
+            <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
+            <div className="text-sm font-medium mb-4">
+              {formatDateDDMMYYYY(profile.profile.birthday)}
+            </div>
+
+            <div className="text-xs text-gray-400 mb-2">
+              Giới thiệu bản thân
+            </div>
+            <div className="text-sm font-medium mb-4 whitespace-pre-line">
+              {profile.profile.bio}
+            </div>
+
+            <div className="text-xs text-gray-400 mb-2">Gia Nhập Từ</div>
+            <div className="text-sm font-medium mb-4">
+              {formatDateDDMMYYYY(profile.createdAt)}
+            </div>
           </div>
-          <div className="flex-1 flex flex-col items-center cursor-pointer">
-            <span
-              className="text-lg font-bold text-gray-800"
-              onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
-            >
-              {profile.followerCount ?? 0}
-            </span>
-            <span
-              className="text-xs text-gray-500"
-              onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
-            >
-              Người theo dõi
-            </span>
-          </div>
-
-          <div className="flex-1 flex flex-col items-center cursor-pointer">
-            <span
-              className="text-lg font-bold text-gray-800"
-              onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
-            >
-              {profile.followingCount ?? 0}
-            </span>
-            <span
-              className="text-xs text-gray-500"
-              onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
-            >
-              Đang theo dõi
-            </span>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2 mb-2">
-          <div className="text-gray-500 text-sm">{profile.username}</div>
-          {/* Icon giới tính */}
-          <div className="mb-2">
-            {profile.profile.gender === "male" && (
-              <span title="Nam" className="text-blue-500 text-lg">
-                ♂️
-              </span>
-            )}
-            {profile.profile.gender === "female" && (
-              <span title="Nữ" className="text-pink-500 text-lg">
-                ♀️
-              </span>
-            )}
-            {(!profile.profile.gender ||
-              (profile.profile.gender !== "male" &&
-                profile.profile.gender !== "female")) && (
-              <span title="Khác" className="text-gray-400 text-lg">
-                ⚧️
-              </span>
-            )}
-          </div>
-        </div>
-        <div className="flex gap-2 mb-4">
-          {isOwnProfile ? (
-            <button
-              className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
-              onClick={() =>
-                navigate("/edit-profile", {
-                  state: {
-                    avatar: profile.profile.avatar,
-                    username: profile.username,
-                    lastname: profile.profile?.lastname,
-                    firstname: profile.profile?.firstname,
-                    birthday: profile.profile?.birthday,
-                    bio: profile.profile?.bio,
-                  },
-                })
-              }
-            >
-              <FaEdit /> Sửa Hồ Sơ
-            </button>
-          ) : (
-            <>
-              <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
-                Kết bạn
-              </button>
-              <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
-                Nhắn tin
-              </button>
-            </>
-          )}
-        </div>
-
-        <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
-        <div className="text-sm font-medium mb-4">
-          {formatDateDDMMYYYY(profile.profile.birthday)}
-        </div>
-
-        <div className="text-xs text-gray-400 mb-2">Giới thiệu bản thân</div>
-        <div className="text-sm font-medium mb-4 whitespace-pre-line">
-          {profile.profile.bio}
-        </div>
-
-        <div className="text-xs text-gray-400 mb-2">Gia Nhập Từ</div>
-        <div className="text-sm font-medium mb-4">
-          {formatDateDDMMYYYY(profile.createdAt)}
-        </div>
+        </StickyBox>
       </div>
       {/* Right: Activity & Connections */}
-      <div className="md:w-2/3 w-full bg-white rounded-2xl shadow-lg p-8 flex flex-col h-auto justify-center">
+      <div className="flex-1 bg-white rounded-2xl shadow-lg p-8 flex flex-col h-auto justify-center">
         {/* Tabs */}
         <div className="border-b border-gray-300 pb-2 mb-4 flex gap-6">
           <button
