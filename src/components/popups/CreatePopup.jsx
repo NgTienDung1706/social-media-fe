@@ -1,8 +1,9 @@
-import React, { useState } from "react";
+import React, { useState, useRef, useEffect } from "react";
 import { BsFileImage } from "react-icons/bs";
 import { FaRegLaughBeam } from "react-icons/fa";
 import { FaTags } from "react-icons/fa6";
 import { TiDelete } from "react-icons/ti";
+import useImageHeight from "@/features/posts/hooks/useImageHeight";
 
 const mockUser = {
   username: "tttien.dung176",
@@ -49,15 +50,47 @@ function convertEmotionToEnglish(label) {
   }
 }
 
+// Regex để bắt hashtag
+function extractHashtags(text) {
+  // Bắt đầu bằng #, theo sau là chữ/số/ký tự _
+  // \p{L} => mọi ký tự chữ (Unicode), \p{N} => số (Unicode)
+  const regex = /#([\p{L}\p{N}_]+)/gu;
+  const matches = text.match(regex);
+  return matches ? matches.map((tag) => tag.slice(1)) : [];
+}
+
 export default function CreatePopup({ open, onClose }) {
   const [images, setImages] = useState([]);
   const [currentImg, setCurrentImg] = useState(0);
   const [caption, setCaption] = useState("");
+  const [hashtags, setHashtags] = useState([]);
   const [showEmotionPopup, setShowEmotionPopup] = useState(false);
   const [emotion, setEmotion] = useState(null);
   const [showTagPopup, setShowTagPopup] = useState(false);
   const [taggedUsers, setTaggedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
+  const containerRef = useRef(null);
+  const [containerWidth, setContainerWidth] = useState(468);
+
+  useEffect(() => {
+    function updateWidth() {
+      if (containerRef.current) {
+        const actualWidth = containerRef.current.offsetWidth;
+        setContainerWidth(actualWidth < 468 ? actualWidth : 468);
+      }
+    }
+    updateWidth();
+    window.addEventListener("resize", updateWidth);
+    return () => window.removeEventListener("resize", updateWidth);
+  }, []);
+
+  const maxHeight = useImageHeight(images, containerWidth);
+
+  useEffect(() => {
+    const tags = extractHashtags(caption);
+    setHashtags(tags);
+    console.log("Hashtags:", tags);
+  }, [caption]);
 
   if (!open) return null;
 
@@ -152,7 +185,7 @@ export default function CreatePopup({ open, onClose }) {
 
   return (
     <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center z-50">
-      <div className="bg-white rounded-xl shadow-lg flex w-[900px] h-[600px] overflow-hidden flex-col">
+      <div className="bg-white rounded-xl shadow-lg flex w-auto h-auto overflow-hidden flex-col">
         {/* Header */}
         <div className="flex items-center justify-between border-b px-4 py-2">
           <button className="text-xl" onClick={onClose}>
@@ -165,7 +198,10 @@ export default function CreatePopup({ open, onClose }) {
         </div>
         <div className="flex flex-1">
           {/* Left: Image preview & tag */}
-          <div className="relative flex-1 flex items-center justify-center">
+          <div
+            ref={containerRef}
+            className="relative flex-1 flex items-center justify-center w-[468px] min-h-[468px] max-h-[650px]"
+          >
             {images.length === 0 ? (
               <div
                 className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 bg-white cursor-pointer"
@@ -220,6 +256,7 @@ export default function CreatePopup({ open, onClose }) {
                 <label className="bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold cursor-pointer">
                   Chọn từ máy tính
                   <input
+                    key={images.length}
                     type="file"
                     accept="image/*"
                     multiple
@@ -238,6 +275,8 @@ export default function CreatePopup({ open, onClose }) {
                         });
                         Promise.all(readers).then((imgs) => setImages(imgs));
                       }
+                      // Reset value để lần sau chọn lại cùng file vẫn trigger được
+                      e.target.value = "";
                     }}
                   />
                 </label>
@@ -246,7 +285,10 @@ export default function CreatePopup({ open, onClose }) {
               <>
                 <button
                   className="absolute top-4 right-4 bg-white bg-opacity-80 rounded-full p-1 shadow text-xl font-bold z-10 hover:bg-red-100"
-                  onClick={() => setImages([])}
+                  onClick={() => {
+                    setImages([]);
+                    setCurrentImg(0);
+                  }}
                   title="Xóa tất cả ảnh"
                 >
                   <TiDelete />
@@ -255,7 +297,7 @@ export default function CreatePopup({ open, onClose }) {
                   src={images[currentImg]}
                   alt="preview"
                   className="object-contain max-h-full max-w-full rounded"
-                  style={{ width: "100%", height: "100%" }}
+                  style={{ width: "100%", height: maxHeight }}
                 />
                 {images.length > 1 && (
                   <>
