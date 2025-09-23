@@ -10,12 +10,11 @@ import useImageHeight from "@/features/posts/hooks/useImageHeight";
 const mockUser = {
   username: "tttien.dung176",
   avatar: "/assets/default_avatar.png",
-  _id: "6881f4d79ef0816e9f3e81c6", // Thêm _id giả lập
 };
 
 const mockTaggedUsers = [
   {
-    username: "_tiendung.1706_",
+    username: "xuanquang.10",
     followers: "142 người theo dõi",
     avatar: "/assets/avatar1.png",
   },
@@ -53,27 +52,34 @@ function convertEmotionToEnglish(label) {
   }
 }
 
+// Regex để bắt hashtag
 function extractHashtags(text) {
+  // Bắt đầu bằng #, theo sau là chữ/số/ký tự _
+  // \p{L} => mọi ký tự chữ (Unicode), \p{N} => số (Unicode)
   const regex = /#([\p{L}\p{N}_]+)/gu;
   const matches = text.match(regex);
   return matches ? matches.map((tag) => tag.slice(1)) : [];
 }
 
 export default function CreatePopup({ open, onClose }) {
-  const [media, setMedia] = useState([]); // DataURLs cho preview (ảnh hoặc video)
-  const [files, setFiles] = useState([]); // Files gốc để upload
-  const [currentMedia, setCurrentMedia] = useState(0); // Media đang xem
-  const [isVideo, setIsVideo] = useState(false); // Trạng thái video hay ảnh
-  const [caption, setCaption] = useState("");
-  const [hashtags, setHashtags] = useState([]);
+  const [images, setImages] = useState([]); // DataURLs cho preview
+  const [currentImg, setCurrentImg] = useState(0); // Ảnh đang xem
+  const [caption, setCaption] = useState(""); // Nội dung caption
+  const [hashtags, setHashtags] = useState([]); // Mảng hashtags
   const [showEmotionPopup, setShowEmotionPopup] = useState(false);
   const [emotion, setEmotion] = useState(null);
   const [showTagPopup, setShowTagPopup] = useState(false);
   const [taggedUsers, setTaggedUsers] = useState([]);
   const [searchQuery, setSearchQuery] = useState("");
-  const [uploading, setUploading] = useState(false);
+  // const [location, setLocation] = useState("");
+  // const [isStory, setIsStory] = useState(false);
+  // const [visibility, setVisibility] = useState("public");
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(468);
+
+  const [files, setFiles] = useState([]); // Files gốc để upload
+  const [uploading, setUploading] = useState(false);
+  //const [postCreated, setPostCreated] = useState(false); // Để hiển thị thành công
 
   useEffect(() => {
     function updateWidth() {
@@ -87,11 +93,12 @@ export default function CreatePopup({ open, onClose }) {
     return () => window.removeEventListener("resize", updateWidth);
   }, []);
 
-  const maxHeight = useImageHeight(isVideo ? [] : media, containerWidth);
+  const maxHeight = useImageHeight(images, containerWidth);
 
   useEffect(() => {
     const tags = extractHashtags(caption);
     setHashtags(tags);
+    //console.log("Hashtags:", tags);
   }, [caption]);
 
   if (!open) return null;
@@ -106,60 +113,24 @@ export default function CreatePopup({ open, onClose }) {
     { label: "cô đơn", icon: "🥺" },
   ];
 
-  // Validate và xử lý file
-  const handleFileSelect = (selectedFiles) => {
-    if (selectedFiles.length === 0) return;
-
-    const types = Array.from(selectedFiles).map((f) =>
-      f.type.startsWith("video/") ? "video" : "image"
-    );
-    const hasVideo = types.includes("video");
-
-    // Validate: Chỉ một video hoặc nhiều ảnh
-    if (hasVideo && selectedFiles.length > 1) {
-      alert("Chỉ được đăng một video cho mỗi bài viết.");
-      return;
-    }
-    if (hasVideo && types.some((type) => type !== "video")) {
-      alert("Không được kết hợp ảnh và video trong cùng một bài viết.");
-      return;
-    }
-    if (!hasVideo && types.some((type) => type !== "image")) {
-      alert("Chỉ được đăng ảnh nếu không có video.");
-      return;
-    }
-
-    setFiles(selectedFiles);
-    setIsVideo(hasVideo);
-    const readers = selectedFiles.map((file) => {
-      return new Promise((resolve) => {
-        const reader = new FileReader();
-        reader.onload = (e) => resolve(e.target.result);
-        reader.readAsDataURL(file);
-      });
-    });
-    Promise.all(readers).then((urls) => setMedia(urls));
-  };
-
+  // Hàm upload và tạo post (thêm vào component)
   const handleShare = async () => {
-    if (files.length === 0 && caption.trim() === "") {
-      alert("Vui lòng thêm nội dung hoặc media.");
-      return;
-    }
+    if (files.length === 0 && caption.trim() === "") return; // Validate
 
     setUploading(true);
     try {
-      // Lấy signature từ backend
+      // Bước 1: Lấy signature từ backend
       const { signature, timestamp, cloudname, apikey } =
-        await axiosInstance.get("/post/upload-signature");
+        await axiosInstance.get("/post/upload-signature"); // Thay bằng URL backend
 
-      // Upload files lên Cloudinary
+      // Bước 2: Upload từng file lên Cloudinary
       const uploadPromises = files.map(async (file) => {
         const formData = new FormData();
         formData.append("file", file);
         formData.append("api_key", apikey);
         formData.append("timestamp", timestamp);
         formData.append("signature", signature);
+        // formData.append('upload_preset', 'ml_default'); // Nếu dùng preset
         formData.append("folder", "posts");
 
         const response = await axios.post(
@@ -171,27 +142,30 @@ export default function CreatePopup({ open, onClose }) {
         );
         return {
           url: response.data.secure_url,
-          type: response.data.resource_type,
-          public_id: response.data.public_id,
+          type: response.data.resource_type, // 'image' hoặc 'video'
         };
       });
 
       const media = await Promise.all(uploadPromises);
 
-      // Gửi dữ liệu bài viết
+      // Bước 3: Gửi dữ liệu cho backend để tạo post
       const postData = {
-        author: mockUser._id,
+        author: mockUser._id, // Thay bằng auth.user._id
         content: {
           caption,
           hashtags,
           media,
         },
         emotion: emotion ? convertEmotionToEnglish(emotion.label) : null,
-        tagged_users: taggedUsers.map((u) => u.username),
+        tagged_users: taggedUsers ? taggedUsers.map((u) => u.username) : [],
+        //location: location || undefined,
+        //isStory,
+        //visibility,
       };
 
-      await axiosInstance.post("/post", postData);
-      alert("Bài viết đã được tạo!");
+      await axiosInstance.post("/post", postData); // Thay bằng URL backend
+      //setPostCreated(true);
+      // Reset form hoặc đóng popup
       onClose();
     } catch (error) {
       console.error("Error creating post:", error);
@@ -203,8 +177,13 @@ export default function CreatePopup({ open, onClose }) {
 
   const handleTagUser = (user) => {
     if (!taggedUsers.find((u) => u.username === user.username)) {
+      // Thêm người dùng vào danh sách đã gắn thẻ
       setTaggedUsers([...taggedUsers, user]);
+      // Loại bỏ người dùng khỏi danh sách gần đây (mockTaggedUsers)
+      // Lưu ý: Đây là một bản sao, không thay đổi trực tiếp mockTaggedUsers gốc
+      // Nếu bạn cần cập nhật danh sách gốc, hãy tạo một state riêng cho danh sách gần đây
     }
+    //setShowTagPopup(false);
   };
 
   const removeTaggedUser = (userToRemove) => {
@@ -213,8 +192,21 @@ export default function CreatePopup({ open, onClose }) {
     );
   };
 
+  // const getTaggedDisplayText = () => {
+  //   if (taggedUsers.length === 0) return "";
+  //   if (taggedUsers.length === 1) {
+  //     return `cùng với ${taggedUsers[0].username}`;
+  //   } else if (taggedUsers.length === 2) {
+  //     return `cùng ${taggedUsers[0].username} và ${taggedUsers[1].username}`;
+  //   } else {
+  //     return `cùng ${taggedUsers[0].username} và ${
+  //       taggedUsers.length - 1
+  //     } người khác`;
+  //   }
+  // };
   const getTaggedDisplayText = () => {
     if (taggedUsers.length === 0) return null;
+
     if (taggedUsers.length === 1) {
       return (
         <>
@@ -258,7 +250,6 @@ export default function CreatePopup({ open, onClose }) {
       user.username.toLowerCase().includes(searchQuery.toLowerCase()) &&
       !taggedUsers.find((tagged) => tagged.username === user.username)
   );
-
   function capitalizeFirstLetter(string) {
     return string.charAt(0).toUpperCase() + string.slice(1);
   }
@@ -273,20 +264,23 @@ export default function CreatePopup({ open, onClose }) {
           </button>
           <span className="font-semibold text-sm">Tạo bài viết mới</span>
           <button
-            className="text-blue-600 font-semibold text-sm disabled:opacity-50"
+            className="text-blue-600 font-semibold text-sm"
             onClick={handleShare}
             disabled={uploading}
           >
             {uploading ? "Đang tải lên..." : "Chia sẻ"}
           </button>
+          {/* <button className="text-blue-600 font-semibold text-sm">
+            Chia sẻ
+          </button> */}
         </div>
         <div className="flex flex-1">
-          {/* Left: Media preview */}
+          {/* Left: Image preview & tag */}
           <div
             ref={containerRef}
             className="relative flex-1 flex items-center justify-center w-[468px] min-h-[468px] max-h-[650px]"
           >
-            {media.length === 0 ? (
+            {images.length === 0 ? (
               <div
                 className="flex flex-col items-center justify-center w-full h-full border-2 border-dashed border-gray-300 bg-white cursor-pointer"
                 onDragOver={(e) => e.preventDefault()}
@@ -296,19 +290,32 @@ export default function CreatePopup({ open, onClose }) {
                     (f) =>
                       f.type.startsWith("image/") || f.type.startsWith("video/")
                   );
-                  handleFileSelect(droppedFiles);
+                  if (droppedFiles.length) {
+                    setFiles(droppedFiles);
+                    const readers = droppedFiles.map((file) => {
+                      return new Promise((resolve) => {
+                        const reader = new FileReader();
+                        reader.onload = (e) => resolve(e.target.result);
+                        reader.readAsDataURL(file);
+                      });
+                    });
+                    Promise.all(readers).then((imgs) => setImages(imgs));
+                  }
                 }}
               >
                 <div className="mb-4">
                   <svg
-                    aria-label="Biểu tượng thể hiện file phương tiện"
+                    aria-label="Biểu tượng thể hiện file phương tiện, chẳng hạn như hình ảnh hoặc video"
                     fill="currentColor"
                     height="77"
                     role="img"
                     viewBox="0 0 97.6 77.3"
                     width="96"
                   >
-                    <title>Biểu tượng thể hiện file phương tiện</title>
+                    <title>
+                      Biểu tượng thể hiện file phương tiện, chẳng hạn như hình
+                      ảnh hoặc video
+                    </title>
                     <path
                       d="M16.3 24h.3c2.8-.2 4.9-2.6 4.8-5.4-.2-2.8-2.6-4.9-5.4-4.8s-4.9 2.6-4.8 5.4c.1 2.7 2.4 4.8 5.1 4.8zm-2.4-7.2c.5-.6 1.3-1 2.1-1h.2c1.7 0 3.1 1.4 3.1 3.1 0 1.7-1.4 3.1-3.1 3.1-1.7 0-3.1-1.4-3.1-3.1 0-.8.3-1.5.8-2.1z"
                       fill="currentColor"
@@ -324,14 +331,14 @@ export default function CreatePopup({ open, onClose }) {
                   </svg>
                 </div>
                 <div className="text-lg text-gray-600 mb-4">
-                  Kéo ảnh hoặc video vào đây
+                  Kéo ảnh và video vào đây
                 </div>
                 <label className="bg-blue-500 text-white px-3 py-2 rounded-lg font-semibold cursor-pointer">
                   Chọn từ máy tính
                   <input
-                    key={media.length}
+                    key={images.length}
                     type="file"
-                    accept="image/*,video/*"
+                    accept="image/*"
                     multiple
                     className="hidden"
                     onChange={(e) => {
@@ -340,9 +347,36 @@ export default function CreatePopup({ open, onClose }) {
                           f.type.startsWith("image/") ||
                           f.type.startsWith("video/")
                       );
-                      handleFileSelect(selectedFiles);
+                      if (selectedFiles.length) {
+                        setFiles(selectedFiles); // Lưu files gốc
+                        const readers = selectedFiles.map((file) => {
+                          return new Promise((resolve) => {
+                            const reader = new FileReader();
+                            reader.onload = (e) => resolve(e.target.result);
+                            reader.readAsDataURL(file);
+                          });
+                        });
+                        Promise.all(readers).then((imgs) => setImages(imgs));
+                      }
                       e.target.value = "";
                     }}
+                    // onChange={(e) => {
+                    //   const files = Array.from(e.target.files).filter((f) =>
+                    //     f.type.startsWith("image/")
+                    //   );
+                    //   if (files.length) {
+                    //     const readers = files.map((file) => {
+                    //       return new Promise((resolve) => {
+                    //         const reader = new FileReader();
+                    //         reader.onload = (e) => resolve(e.target.result);
+                    //         reader.readAsDataURL(file);
+                    //       });
+                    //     });
+                    //     Promise.all(readers).then((imgs) => setImages(imgs));
+                    //   }
+                    //   // Reset value để lần sau chọn lại cùng file vẫn trigger được
+                    //   e.target.value = "";
+                    // }}
                   />
                 </label>
               </div>
@@ -350,69 +384,56 @@ export default function CreatePopup({ open, onClose }) {
               <>
                 <button
                   className="absolute top-4 right-4 bg-white bg-opacity-80 rounded-full p-1 shadow text-xl font-bold z-10 hover:bg-red-100"
+                  // Nếu cần xóa images, cũng xóa files
                   onClick={() => {
-                    setMedia([]);
+                    setImages([]);
                     setFiles([]);
-                    setCurrentMedia(0);
-                    setIsVideo(false);
+                    setCurrentImg(0);
                   }}
-                  title="Xóa tất cả media"
+                  title="Xóa tất cả ảnh"
                 >
                   <TiDelete />
                 </button>
-                {isVideo ? (
-                  <video
-                    src={media[0]}
-                    controls
-                    className="object-contain max-h-full max-w-full rounded"
-                    style={{ width: "100%", height: maxHeight || "auto" }}
-                  />
-                ) : (
+                <img
+                  src={images[currentImg]}
+                  alt="preview"
+                  className="object-contain max-h-full max-w-full rounded"
+                  style={{ width: "100%", height: maxHeight }}
+                />
+                {images.length > 1 && (
                   <>
-                    <img
-                      src={media[currentMedia]}
-                      alt="preview"
-                      className="object-contain max-h-full max-w-full rounded"
-                      style={{ width: "100%", height: maxHeight }}
-                    />
-                    {media.length > 1 && (
-                      <>
-                        <button
-                          className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow"
-                          onClick={() =>
-                            setCurrentMedia((prev) =>
-                              prev === 0 ? media.length - 1 : prev - 1
-                            )
-                          }
-                        >
-                          &#8592;
-                        </button>
-                        <button
-                          className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow"
-                          onClick={() =>
-                            setCurrentMedia((prev) =>
-                              prev === media.length - 1 ? 0 : prev + 1
-                            )
-                          }
-                        >
-                          &#8594;
-                        </button>
-                        <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
-                          {media.map((_, idx) => (
-                            <span
-                              key={idx}
-                              className={`w-2 h-2 rounded-full ${
-                                idx === currentMedia
-                                  ? "bg-blue-500"
-                                  : "bg-gray-300"
-                              }`}
-                            />
-                          ))}
-                        </div>
-                      </>
-                    )}
+                    <button
+                      className="absolute left-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow"
+                      onClick={() =>
+                        setCurrentImg((prev) =>
+                          prev === 0 ? images.length - 1 : prev - 1
+                        )
+                      }
+                    >
+                      &#8592;
+                    </button>
+                    <button
+                      className="absolute right-4 top-1/2 -translate-y-1/2 bg-white bg-opacity-80 rounded-full p-2 shadow"
+                      onClick={() =>
+                        setCurrentImg((prev) =>
+                          prev === images.length - 1 ? 0 : prev + 1
+                        )
+                      }
+                    >
+                      &#8594;
+                    </button>
                   </>
                 )}
+                <div className="absolute bottom-4 left-1/2 -translate-x-1/2 flex gap-2">
+                  {images.map((_, idx) => (
+                    <span
+                      key={idx}
+                      className={`w-2 h-2 rounded-full ${
+                        idx === currentImg ? "bg-blue-500" : "bg-gray-300"
+                      }`}
+                    />
+                  ))}
+                </div>
               </>
             )}
           </div>

@@ -1,4 +1,4 @@
-import axios from '@/utils/axiosInstance';
+import axios from "@/utils/axiosInstance";
 
 // Lấy danh sách bài viết của 1 user (theo userId hoặc username)
 // export const getUserPosts = async (username) => {
@@ -21,3 +21,7 @@ export const getUserPosts = async (username, page, limit) => {
   };
 };
 
+export const createPost = async (content, imageUrls) => {
+  const res = await axios.post("/post", { content, images: imageUrls });
+  return res.post;
+};
