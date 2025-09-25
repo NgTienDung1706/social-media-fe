@@ -22,7 +22,17 @@ const usersSlice = createSlice({
     status: {}, // { userId: "idle" | "loading" | "succeeded" | "failed" }
     error: {}, // { userId: errorMessage }
   },
-  reducers: {},
+  reducers: {
+    setUserFollowStatus: (state, action) => {
+      const { userId, isFollowing } = action.payload;
+      if (state.entities[userId]) {
+        state.entities[userId].relationship_status = {
+          ...state.entities[userId].relationship_status,
+          following: isFollowing,
+        };
+      }
+    },
+  },
   extraReducers: (builder) => {
     builder
       .addCase(fetchUserByUsername.pending, (state, action) => {
@@ -44,4 +54,5 @@ const usersSlice = createSlice({
   },
 });
 
+export const { setUserFollowStatus } = usersSlice.actions;
 export default usersSlice.reducer;

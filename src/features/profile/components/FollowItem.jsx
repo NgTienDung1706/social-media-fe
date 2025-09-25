@@ -141,7 +141,7 @@ const UserFollowItem = forwardRef(
             </div>
           </div>
 
-          {!user.relationship_status?.isMe && (
+          {!user.relationship_status?.isMe && mode !== "tagged" && (
             <div className="flex gap-2">
               <button
                 className={`px-4 py-1 rounded-full font-semibold border ${

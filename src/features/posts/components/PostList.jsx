@@ -1,56 +1,80 @@
 // src/features/home/components/PostList.jsx
-import a from '@/assets/a.jpg';
-import example1 from '@/assets/example1.jpg';
-import example2 from '@/assets/example2.jpg';
-import PostItem from '@/features/posts/components/PostItem'
+import a from "@/assets/a.jpg";
+import example1 from "@/assets/example1.jpg";
+import example2 from "@/assets/example2.jpg";
+import PostItem from "@/features/posts/components/PostItem";
 
 const fakePosts = [
   {
     id: 1,
-    avatar: "https://randomuser.me/api/portraits/men/32.jpg",
-    username: "_tiendung",
-    time: "8 giờ",
-    imgList: [
-      "https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=600&q=80",
-      "https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=600&q=80",
-      a
-    ],
-    caption: "Cảm ơn mọi người đã ủng hộ!",
-    likes: "189.380",
-    comments: "565",
+    avatar: "https://picsum.photos/40/40",
+    username: "nguyen_van_a",
+    time: "2025-09-25T15:00:00+07:00",
+    caption:
+      "Chào mọi người! Hôm nay thật tuyệt vời #vui #hạnh_phúc\nCảm ơn mọi người đã ủng hộ #team",
+    hashtags: ["vui", "hạnh_phúc", "team"],
+    media: ["https://picsum.photos/468/300", "https://picsum.photos/468/350"],
+    emotion: { label: "vui vẻ", icon: "😊" },
+    tagged_users: [{ username: "tran_thi_b" }, { username: "le_van_c" }],
+    location: "Hà Nội",
+    isStory: false,
+    visibility: "public",
+    likes: 120,
+    commentCount: 15,
   },
   {
     id: 2,
-    avatar: "https://randomuser.me/api/portraits/men/44.jpg",
-    username: "_quangtx",
-    time: "2 giờ",
-    imgList: [
-      "https://hoanghamobile.com/tin-tuc/wp-content/uploads/2024/04/anh-bien.jpg",
-      "https://images.unsplash.com/photo-1502082553048-f009c37129b9?auto=format&fit=crop&w=600&q=80"
-    ],
-    caption: "Một ngày đẹp trời 🌞",
-    hashtags: ["nature", "sunny"],
-    likes: "2.345",
-    comments: "12",
+    avatar: "https://picsum.photos/40/40",
+    username: "tran_thi_b",
+    time: "2025-09-25T14:30:00+07:00",
+    caption: "Đi du lịch ở Đà Lạt, cảnh đẹp mê ly! #travel #dalat",
+    hashtags: ["travel", "dalat"],
+    media: "https://www.w3schools.com/html/mov_bbb.mp4", // Reliable video URL for testing
+    emotion: null,
+    tagged_users: [],
+    location: "Đà Lạt",
+    isStory: false,
+    visibility: "friends",
+    likes: 85,
+    commentCount: 10,
   },
   {
     id: 3,
-    avatar: "https://randomuser.me/api/portraits/men/43.jpg",
-    username: "_datis.14_",
-    time: "2 giờ",
-    imgList: [
-      example2
-    ], 
-    caption: "Hoàng hôn nhớ nhà",
-    likes: "345",
-    comments: "50",
+    avatar: "https://picsum.photos/40/40",
+    username: "le_van_c",
+    time: "2025-09-25T12:00:00+07:00",
+    caption: "Một ngày bình yên, không hashtag, không drama\nChỉ cần thư giãn!",
+    hashtags: [],
+    media: ["https://picsum.photos/468/350"],
+    emotion: { label: "thư giãn", icon: "😌" },
+    tagged_users: [{ username: "nguyen_van_a" }],
+    location: null,
+    isStory: true,
+    visibility: "private",
+    likes: 45,
+    commentCount: 5,
+  },
+  {
+    id: 4,
+    avatar: "https://picsum.photos/40/40",
+    username: "hoang_thi_d",
+    time: "2025-09-25T10:00:00+07:00",
+    caption: "Chúc mừng sinh nhật bạn thân! 🎉 #sinhnhat #bestfriend",
+    hashtags: ["sinhnhat", "bestfriend"],
+    media: [], // Empty media to test no-media case
+    emotion: { label: "hạnh phúc", icon: "🎂" },
+    tagged_users: [{ username: "tran_thi_b" }],
+    location: "TP. Hồ Chí Minh",
+    isStory: false,
+    visibility: "public",
+    likes: 200,
+    commentCount: 25,
   },
 ];
-
 function PostList() {
   return (
     <div className="flex flex-col gap-8 mt-6">
-      {fakePosts.map(post => (
+      {fakePosts.map((post) => (
         <PostItem key={post.id} {...post} />
       ))}
     </div>

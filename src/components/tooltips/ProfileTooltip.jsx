@@ -1,9 +1,12 @@
 import React, { useState, useEffect } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { fetchUserByUsername } from "@/redux/usersSlice";
+import { followUser, unfollowUser } from "@/features/profile/profileAPI";
+import { setUserFollowStatus } from "@/redux/usersSlice";
 
 const ProfileTooltip = ({ userid, username }) => {
   const dispatch = useDispatch();
+  const [loading, setLoading] = useState(false);
 
   // Lấy user từ redux store theo userId
   const currentUser = useSelector((state) => state.users.entities[userid]);
@@ -38,13 +41,28 @@ const ProfileTooltip = ({ userid, username }) => {
     // TODO: mở khung chat ở đây
   };
 
-  const handleFollowToggle = () => {
-    const newStatus = !isFollowing;
-    setIsFollowing(newStatus);
-    console.log(
-      newStatus ? `Đang theo dõi ${username}` : `Bỏ theo dõi ${username}`
-    );
+  const handleFollowToggle = async () => {
+    // const newStatus = !isFollowing;
+    // setIsFollowing(newStatus);
+    // console.log(
+    //   newStatus ? `Đang theo dõi ${username}` : `Bỏ theo dõi ${username}`
+    // );
     // TODO: gọi API follow/unfollow ở đây
+    if (isFollowing) {
+      setLoading(true);
+      const res = await unfollowUser(userid);
+      if (res) {
+        dispatch(setUserFollowStatus({ userId: userid, isFollowing: false }));
+      }
+      setLoading(false);
+    } else {
+      setLoading(true);
+      const res = await followUser(userid);
+      if (res) {
+        dispatch(setUserFollowStatus({ userId: userid, isFollowing: true }));
+      }
+      setLoading(false);
+    }
   };
 
   return (

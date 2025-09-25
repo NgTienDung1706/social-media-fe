@@ -146,7 +146,7 @@ function AppSidebar() {
       searchOpen ? "gap-0" : "gap-4"
     } px-4 py-2 rounded-lg w-full text-left transition-colors duration-150 ` +
     (activeItem === key
-      ? "bg-gray-200 text-brand-blue font-bold border-l-4 border-blue-500"
+      ? "bg-gray-200 text-brand-green font-bold border-l-4 border-brand-green"
       : "hover:bg-gray-100 text-gray-700");
   return (
     <>

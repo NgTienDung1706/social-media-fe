@@ -1,8 +1,11 @@
 import { FaRegHeart, FaRegComment, FaRegShareSquare } from "react-icons/fa";
 import { useState, useMemo, useEffect, useRef } from "react";
+import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
+import ProfileTooltipWrapper from "@/components/tooltips/ProfileTooltipWrapper";
+import UserListModal from "@/components/modals/UserListModal";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -45,6 +48,8 @@ function PostItem({
   const isButtonPressed = useRef(false);
   const containerRef = useRef(null);
   const [containerWidth, setContainerWidth] = useState(468);
+  const navigate = useNavigate();
+  const [showTaggedUsersModal, setShowTaggedUsersModal] = useState(false);
 
   // Xử lý media: mảng URL (ảnh) hoặc chuỗi URL (video)
   const mediaList = useMemo(() => {
@@ -52,11 +57,20 @@ function PostItem({
     return Array.isArray(media) ? media : [media];
   }, [media]);
 
+  // const isVideo = useMemo(() => {
+  //   return (
+  //     !Array.isArray(media) ||
+  //     (mediaList.length === 1 && mediaList[0].endsWith(".mp4")) ||
+  //     mediaList[0].includes("/video/")
+  //   );
+  // }, [media, mediaList]);
   const isVideo = useMemo(() => {
+    if (!mediaList || mediaList.length === 0) return false;
     return (
       !Array.isArray(media) ||
-      (mediaList.length === 1 && mediaList[0].endsWith(".mp4")) ||
-      mediaList[0].includes("/video/")
+      (mediaList.length === 1 &&
+        mediaList[0] &&
+        (mediaList[0].endsWith(".mp4") || mediaList[0].includes("/video/")))
     );
   }, [media, mediaList]);
 
@@ -151,10 +165,128 @@ function PostItem({
     }
   }, [mediaList, containerWidth, isVideo]);
 
+  const getTaggedDisplayText = () => {
+    if (tagged_users.length === 0) return null;
+    if (tagged_users.length === 1) {
+      return (
+        <>
+          <span className="text-gray-500"> cùng với </span>
+          <ProfileTooltipWrapper user={tagged_users[0]}>
+            <span
+              className="hover:underline cursor-pointer"
+              onClick={() => {
+                navigate(`/profile/${tagged_users[0].username}`);
+              }}
+            >
+              {tagged_users[0].username}
+            </span>
+          </ProfileTooltipWrapper>
+        </>
+      );
+    } else if (tagged_users.length === 2) {
+      return (
+        <>
+          <span className="text-gray-500"> cùng </span>
+          <ProfileTooltipWrapper user={tagged_users[0]}>
+            <span
+              className="hover:underline cursor-pointer"
+              onClick={() => {
+                navigate(`/profile/${tagged_users[0].username}`);
+              }}
+            >
+              {tagged_users[0].username}
+            </span>
+          </ProfileTooltipWrapper>
+          <span className="text-gray-500"> và </span>
+          <ProfileTooltipWrapper user={tagged_users[1]}>
+            <span
+              className="hover:underline cursor-pointer"
+              onClick={() => {
+                navigate(`/profile/${tagged_users[1].username}`);
+              }}
+            >
+              {tagged_users[1].username}
+            </span>
+          </ProfileTooltipWrapper>
+        </>
+      );
+    } else {
+      return (
+        <>
+          <span className="text-gray-500"> cùng </span>
+          <ProfileTooltipWrapper user={tagged_users[0]}>
+            <span
+              className="hover:underline cursor-pointer"
+              onClick={() => {
+                navigate(`/profile/${tagged_users[0].username}`);
+              }}
+            >
+              {tagged_users[0].username}
+            </span>
+          </ProfileTooltipWrapper>
+          <span className="text-gray-500"> và </span>
+          <span
+            className="hover:underline cursor-pointer"
+            onClick={() => setShowTaggedUsersModal(true)}
+          >
+            {tagged_users.length - 1} người khác
+          </span>
+        </>
+      );
+    }
+  };
+
+  // Hàm xử lý hashtag trong caption
+  const renderCaptionWithHashtags = () => {
+    if (!caption) return null;
+
+    // Tách caption thành các phần, xử lý hashtag
+    const hashtagRegex = /#[^\s#]+/g;
+    const elements = [];
+
+    const lines = caption.split("\n");
+    lines.forEach((line, lineIndex) => {
+      const lineParts = line.split(hashtagRegex);
+      const lineHashtags = line.match(hashtagRegex) || [];
+      //let charIndex = 0;
+
+      lineParts.forEach((part, i) => {
+        if (part) {
+          elements.push(<span key={`part-${lineIndex}-${i}`}>{part}</span>);
+          //charIndex += part.length;
+        }
+        if (lineHashtags[i]) {
+          elements.push(
+            <span
+              key={`hashtag-${lineIndex}-${i}`}
+              className="text-blue-500 hover:underline cursor-pointer text-sm font-medium"
+              onClick={() => {
+                // Thêm logic khi nhấn vào hashtag, ví dụ: điều hướng
+                console.log(`Clicked hashtag: ${lineHashtags[i]}`);
+                // Ví dụ: window.location.href = `/search?q=${lineHashtags[i].slice(1)}`;
+                // navigate(`/search?q=${lineHashtags[i].slice(1)}`)
+              }}
+            >
+              {lineHashtags[i]}
+            </span>
+          );
+          //charIndex += lineHashtags[i].length;
+        }
+      });
+
+      // Thêm xuống dòng nếu không phải dòng cuối
+      if (lineIndex < lines.length - 1) {
+        elements.push(<br key={`br-${lineIndex}`} />);
+      }
+    });
+
+    return elements;
+  };
+
   return (
     <div
       ref={containerRef}
-      className="bg-white rounded-lg shadow py-4 w-full max-w-[468px] mx-auto"
+      className="bg-white rounded-lg shadow-md border-b-2 border-gray-300 py-4 w-full max-w-[468px] mx-auto"
     >
       {/* Header */}
       <div className="flex items-center gap-3 mb-2 px-4">
@@ -164,7 +296,10 @@ function PostItem({
           className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
         />
         <div className="flex flex-col">
-          <span className="font-semibold text-gray-900">{username}</span>
+          <span className="font-semibold text-gray-900 text-sm">
+            {username}
+            {getTaggedDisplayText()}
+          </span>
           <span className="text-xs text-gray-500">
             {formatTimeAgo(time)}
             {isStory && <span className="ml-2 text-blue-500">• Story</span>}
@@ -177,8 +312,17 @@ function PostItem({
         </div>
       </div>
 
+      {/* Emotion */}
+      {emotion?.label && (
+        <div className="px-4 mt-2 mb-2">
+          <span className="text-sm text-gray-600">
+            Đang cảm thấy <span className="font-medium">{emotion.label}</span>{" "}
+            {emotion.icon}
+          </span>
+        </div>
+      )}
       {/* Tagged Users */}
-      {tagged_users && tagged_users.length > 0 && (
+      {/* {tagged_users && tagged_users.length > 0 && (
         <div className="px-4 mb-2">
           <span className="text-gray-600 text-sm">
             Cùng với{" "}
@@ -193,7 +337,7 @@ function PostItem({
             ))}
           </span>
         </div>
-      )}
+      )} */}
 
       {/* Media (Image Carousel hoặc Video) */}
       {mediaList.length > 0 && (
@@ -264,16 +408,6 @@ function PostItem({
         </div>
       )}
 
-      {/* Emotion */}
-      {emotion?.label && (
-        <div className="px-4 mt-2 mb-2">
-          <span className="text-sm text-gray-600">
-            Đang cảm thấy <span className="font-medium">{emotion.label}</span>{" "}
-            {emotion.icon}
-          </span>
-        </div>
-      )}
-
       {/* Location */}
       {location && (
         <div className="px-4 mb-2">
@@ -282,13 +416,16 @@ function PostItem({
       )}
 
       {/* Caption */}
+      {/* Caption với hashtag được highlight */}
       {caption && (
-        <div className="text-gray-800 text-sm mb-1 px-4">{caption}</div>
+        <div className="text-gray-800 text-sm my-2 px-4 whitespace-pre-line">
+          {renderCaptionWithHashtags()}
+        </div>
       )}
 
       {/* Hashtags */}
-      {Array.isArray(hashtags) && hashtags.length > 0 && (
-        <div className="flex flex-wrap gap-2 mb-1 px-4">
+      {/* {Array.isArray(hashtags) && hashtags.length > 0 && (
+        <div className="flex flex-wrap gap-2 px-4">
           {hashtags.map((tag, idx) => (
             <span
               key={idx}
@@ -298,10 +435,10 @@ function PostItem({
             </span>
           ))}
         </div>
-      )}
+      )} */}
 
       {/* Action Buttons */}
-      <div className="flex gap-6 text-xl text-gray-700 mb-2 mt-2 px-4">
+      <div className="flex gap-6 text-xl text-gray-700 my-2 px-4">
         <button className="hover:text-pink-500 transition-colors">
           <FaRegHeart />
         </button>
@@ -317,6 +454,16 @@ function PostItem({
       <div className="text-xs text-gray-500 px-4 pb-2">
         {likes} lượt thích • {commentCount} bình luận
       </div>
+
+      {/* Modal for tagged users */}
+      {showTaggedUsersModal && (
+        <UserListModal
+          title="Những người khác"
+          users={tagged_users.slice(1)} // Hiển thị từ người thứ 2 trở đi
+          onClose={() => setShowTaggedUsersModal(false)}
+          mode="tagged"
+        />
+      )}
     </div>
   );
 }
