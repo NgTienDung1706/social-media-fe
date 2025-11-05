@@ -11,25 +11,29 @@ const TooltipWrapper = ({ children, user }) => {
   const handleMouseEnter = () => {
     if (tooltipTimeout) clearTimeout(tooltipTimeout);
 
-    if (triggerRef.current) {
-      const rect = triggerRef.current.getBoundingClientRect();
-      const viewportHeight = window.innerHeight;
-      const tooltipHeight = 300; // Adjust based on ProfileTooltip height
-      const spaceBelow = viewportHeight - rect.bottom;
-      const showAbove = spaceBelow < tooltipHeight + 16;
+    tooltipTimeout = setTimeout(() => {
+      if (triggerRef.current) {
+        const rect = triggerRef.current.getBoundingClientRect();
+        const viewportHeight = window.innerHeight;
+        const tooltipHeight = 300; // Adjust based on ProfileTooltip height
+        const spaceBelow = viewportHeight - rect.bottom;
+        const showAbove = spaceBelow < tooltipHeight + 16;
 
-      setTooltipPos({
-        top: showAbove
-          ? rect.top + window.scrollY
-          : rect.bottom + window.scrollY,
-        left: rect.left + window.scrollX + rect.width / 2,
-        showAbove,
-      });
-      setShowTooltip(true);
-    }
+        setTooltipPos({
+          top: showAbove
+            ? rect.top + window.scrollY
+            : rect.bottom + window.scrollY,
+          left: rect.left + window.scrollX + rect.width / 2,
+          showAbove,
+        });
+        setShowTooltip(true);
+      }
+    }, 500); // Độ trễ 500ms trước khi hiển thị tooltip
   };
 
   const handleMouseLeave = () => {
+    if (tooltipTimeout) clearTimeout(tooltipTimeout);
+
     tooltipTimeout = setTimeout(() => {
       setShowTooltip(false);
     }, 150);

@@ -2,20 +2,19 @@ import { useEffect, useState } from "react";
 import StickyBox from "react-sticky-box";
 import { getProfile } from "@/features/profile/profileAPI";
 import defaultavatar from "@/assets/defaultavatar.png";
-import { FaEdit, FaUserFriends } from "react-icons/fa";
-import { useNavigate } from "react-router-dom";
 import {
-  FaSteam,
-  FaPlaystation,
-  FaXbox,
-  FaSpotify,
-  FaYoutube,
-  FaDiscord,
+  FaEdit,
+  FaUserShield,
+  FaFlag,
+  FaBorderAll,
+  FaBookmark,
 } from "react-icons/fa";
+import { useNavigate } from "react-router-dom";
 import { useSelector } from "react-redux";
 import UserPostList from "@/features/posts/components/UserPostList";
 import FollowingList from "@/features/profile/components/FollowingList";
 import FollowerList from "@/features/profile/components/FollowerList";
+import OptionsMenu from "@/components/common/OptionsMenu";
 
 function formatDateDDMMYYYY(dateStr) {
   if (!dateStr) return "---";
@@ -31,6 +30,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
   const [profile, setProfile] = useState(profileData);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("posts"); // State to manage the active tab
+  const [hoverTab, setHoverTab] = useState(null); // Theo dõi tab được hover
   const [showFollowingList, setShowFollowingList] = useState(false);
   const [showFollowerList, setShowFollowerList] = useState(false);
 
@@ -58,12 +58,57 @@ function Profile({ isOwnProfile = true, profileData = null }) {
     return <div className="text-center mt-4">Đang tải thông tin...</div>;
   }
 
+  const handleOptionSelect = async (action) => {
+    switch (action) {
+      case "edit":
+        alert("Chức năng chỉnh sửa trang chưa được triển khai");
+        break;
+      case "block":
+        alert("Đã chặn người dùng này");
+        break;
+      case "report":
+        alert("Đã gửi báo cáo người dùng");
+        break;
+      default:
+        console.log(`Action ${action} not handled`);
+    }
+  };
+
+  const profileOptions = [
+    {
+      icon: <FaEdit />,
+      label: "Chỉnh sửa trang",
+      action: () => handleOptionSelect("edit"),
+    },
+    {
+      icon: <FaUserShield />,
+      label: "Chặn người dùng",
+      action: () => handleOptionSelect("block"),
+    },
+    {
+      icon: <FaFlag />,
+      label: "Báo cáo",
+      action: () => handleOptionSelect("report"),
+    },
+  ];
+
+  // Tính toán vị trí của thanh gạch dựa trên tab active hoặc hover
+  const getTabPosition = () => {
+    const tabs = ["posts", "saved"];
+    const index = hoverTab ? tabs.indexOf(hoverTab) : tabs.indexOf(tab);
+    return {
+      left: `${(index * 100) / tabs.length}%`,
+      width: `${100 / tabs.length}%`,
+    };
+  };
+
   return (
     <div className="w-full min-h-screen bg-white flex flex-row justify-center gap-8">
       {/* Left: Profile Card */}
       <div className="w-[350px]">
         <StickyBox offsetTop={40} offsetBottom={20}>
           <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start">
+            {/* <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-brand-green to-brand-blue blur-lg opacity-40 -z-10"></div> */}
             <div className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center relative mb-2 self-center">
               <img
                 src={profile.profile.avatar || defaultavatar}
@@ -82,7 +127,9 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                 <span className="text-lg font-bold text-gray-800">
                   {profile.postCount ?? 0}
                 </span>
-                <span className="text-xs text-gray-500">Bài viết</span>
+                <span className="text-xs text-gray-500 font-semibold">
+                  Bài viết
+                </span>
               </div>
               <div className="flex-1 flex flex-col items-center cursor-pointer">
                 <span
@@ -92,7 +139,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                   {profile.followerCount ?? 0}
                 </span>
                 <span
-                  className="text-xs text-gray-500"
+                  className="text-xs text-gray-500 font-semibold"
                   onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
                 >
                   Người theo dõi
@@ -107,7 +154,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                   {profile.followingCount ?? 0}
                 </span>
                 <span
-                  className="text-xs text-gray-500"
+                  className="text-xs text-gray-500 font-semibold"
                   onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
                 >
                   Đang theo dõi
@@ -138,7 +185,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                 )}
               </div>
             </div>
-            <div className="flex gap-2 mb-4">
+            <div className="flex gap-2 mb-4 justify-between w-full">
               {isOwnProfile ? (
                 <button
                   className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
@@ -167,6 +214,7 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                   </button>
                 </>
               )}
+              <OptionsMenu options={profileOptions} />
             </div>
 
             <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
@@ -191,27 +239,38 @@ function Profile({ isOwnProfile = true, profileData = null }) {
       {/* Right: Activity & Connections */}
       <div className="flex-1 bg-white rounded-2xl shadow-lg p-8 flex flex-col h-auto justify-center">
         {/* Tabs */}
-        <div className="border-b border-gray-300 pb-2 mb-4 flex gap-6">
-          <button
-            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${
-              tab === "posts"
-                ? "text-blue-600 border-blue-600"
-                : "text-gray-800 border-transparent"
-            }`}
-            onClick={() => setTab("posts")}
-          >
-            Bài viết
-          </button>
-          <button
-            className={`text-lg font-semibold pb-2 border-b-2 transition-colors ${
-              tab === "albums"
-                ? "text-blue-600 border-blue-600"
-                : "text-gray-800 border-transparent"
-            }`}
-            onClick={() => setTab("albums")}
-          >
-            Album
-          </button>
+        <div className="bg-white text-black p-2 relative">
+          <div className="flex justify-around">
+            <button
+              className={`relative p-2 flex font-semibold items-center justify-center gap-1 transition-colors duration-300 w-full ${
+                tab === "posts" ? "text-black" : "text-gray-600"
+              }`}
+              onClick={() => setTab("posts")}
+              onMouseEnter={() => setHoverTab("posts")}
+              onMouseLeave={() => setHoverTab(null)}
+              title="Post"
+            >
+              <FaBorderAll className="text-lg" /> Bài viết
+            </button>
+            <button
+              className={`relative p-2 flex font-semibold items-center justify-center gap-1 transition-colors duration-300 w-full ${
+                tab === "saved" ? "text-black" : "text-gray-600"
+              }`}
+              onClick={() => setTab("saved")}
+              onMouseEnter={() => setHoverTab("saved")}
+              onMouseLeave={() => setHoverTab(null)}
+              title="Đã lưu"
+            >
+              <FaBookmark className="text-lg" /> Đã lưu
+            </button>
+          </div>
+          <div
+            className="absolute bottom-0 h-1 bg-gradient-to-r from-brand-green to-brand-blue transition-all duration-300 ease-in-out rounded-full"
+            style={{
+              left: getTabPosition().left,
+              width: getTabPosition().width,
+            }}
+          />
         </div>
         {/* Tab content */}
         <div className="flex-1 flex flex-col items-center justify-center w-full">
@@ -223,9 +282,8 @@ function Profile({ isOwnProfile = true, profileData = null }) {
             </div>
           ) : (
             <div className="w-full">
-              {/* Danh sách album - thay thế bằng component hoặc map dữ liệu thực tế */}
               <div className="text-gray-500 text-center">
-                Chưa có album nào.
+                Chưa có bài viết nào được lưu.
               </div>
             </div>
           )}

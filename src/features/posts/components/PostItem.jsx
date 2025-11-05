@@ -1,11 +1,22 @@
-import { FaRegHeart, FaRegComment, FaRegShareSquare } from "react-icons/fa";
-import { useState, useMemo, useEffect, useRef } from "react";
+import {
+  FaRegHeart,
+  FaRegComment,
+  FaRegShareSquare,
+  FaCog,
+  FaClosedCaptioning,
+  FaVolumeUp,
+  FaHeartBroken,
+  FaFlag,
+  FaBookmark,
+} from "react-icons/fa";
+import { useState, useMemo, useEffect, useRef, act } from "react";
 import { useNavigate } from "react-router-dom";
 import dayjs from "dayjs";
 import relativeTime from "dayjs/plugin/relativeTime";
 import "dayjs/locale/vi";
 import ProfileTooltipWrapper from "@/components/tooltips/ProfileTooltipWrapper";
 import UserListModal from "@/components/modals/UserListModal";
+import OptionsMenu from "@/components/common/OptionsMenu";
 
 dayjs.extend(relativeTime);
 dayjs.locale("vi");
@@ -283,33 +294,108 @@ function PostItem({
     return elements;
   };
 
+  const handleOptionSelect = async (action) => {
+    switch (action) {
+      case "save":
+        // Logic lưu bài viết
+        alert("Đã lưu bài viết (chưa triển khai)");
+        break;
+      case "quality":
+        // Logic thay đổi chất lượng (ví dụ: hiển thị modal chọn chất lượng)
+        alert("Chọn chất lượng video (chưa triển khai)");
+        break;
+      case "subtitle":
+        // Logic bật/tắt phụ đề
+        alert("Bật/tắt phụ đề (chưa triển khai)");
+        break;
+      case "voice":
+        // Logic chuyển đổi trình phát nội
+        alert("Chuyển đổi trình phát nội (chưa triển khai)");
+        break;
+      case "ignore":
+        // Gọi API để không quan tâm bài viết
+        alert("Đã không quan tâm bài viết này");
+        break;
+      case "report":
+        // Gọi API để báo cáo bài viết
+        alert("Đã gửi báo cáo bài viết");
+        break;
+      default:
+        console.log(`Action ${action} not handled`);
+    }
+  };
+
+  const postOptions = [
+    {
+      icon: <FaBookmark />,
+      label: "Lưu bài viết",
+      action: () => handleOptionSelect("save"),
+    },
+    {
+      icon: <FaCog />,
+      label: "Chất lượng",
+      action: () => handleOptionSelect("quality"),
+    },
+    {
+      icon: <FaClosedCaptioning />,
+      label: "Phụ đề",
+      action: () => handleOptionSelect("subtitle"),
+    },
+    {
+      icon: <FaCog />,
+      label: "Cường độ điều chỉnh",
+      action: () => {},
+      //toggle: true,
+      //value: false,
+      //onToggle: () => console.log("Toggle adjustment"),
+    },
+    {
+      icon: <FaVolumeUp />,
+      label: "Trình phát nội",
+      action: () => handleOptionSelect("voice"),
+    },
+    {
+      icon: <FaHeartBroken />,
+      label: "Không quan tâm",
+      action: () => handleOptionSelect("ignore"),
+    },
+    {
+      icon: <FaFlag />,
+      label: "Báo cáo",
+      action: () => handleOptionSelect("report"),
+    },
+  ];
+
   return (
     <div
       ref={containerRef}
       className="bg-white rounded-lg shadow-md border-b-2 border-gray-300 py-4 w-full max-w-[468px] mx-auto"
     >
       {/* Header */}
-      <div className="flex items-center gap-3 mb-2 px-4">
-        <img
-          src={avatar}
-          alt="avatar"
-          className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
-        />
-        <div className="flex flex-col">
-          <span className="font-semibold text-gray-900 text-sm">
-            {username}
-            {getTaggedDisplayText()}
-          </span>
-          <span className="text-xs text-gray-500">
-            {formatTimeAgo(time)}
-            {isStory && <span className="ml-2 text-blue-500">• Story</span>}
-            {visibility !== "public" && (
-              <span className="ml-1 text-green-500">
-                {visibility === "friends" ? "👥" : "🔒"}
-              </span>
-            )}
-          </span>
+      <div className="flex items-center justify-between px-4">
+        <div className="flex items-center gap-3 mb-2">
+          <img
+            src={avatar}
+            alt="avatar"
+            className="w-10 h-10 rounded-full object-cover border-2 border-white shadow"
+          />
+          <div className="flex flex-col">
+            <span className="font-semibold text-gray-900 text-sm">
+              {username}
+              {getTaggedDisplayText()}
+            </span>
+            <span className="text-xs text-gray-500">
+              {formatTimeAgo(time)}
+              {isStory && <span className="ml-2 text-blue-500">• Story</span>}
+              {visibility !== "public" && (
+                <span className="ml-1 text-green-500">
+                  {visibility === "friends" ? "👥" : "🔒"}
+                </span>
+              )}
+            </span>
+          </div>
         </div>
+        <OptionsMenu options={postOptions} />
       </div>
 
       {/* Emotion */}
