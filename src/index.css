@@ -4,7 +4,6 @@
 
 body {
   @apply font-sans;
-
 }
 
 /* Custom animation */
@@ -21,5 +20,15 @@ body {
       opacity: 1;
       transform: scale(1);
     }
+  }
+  .scrollbar-hide {
+    /* Chrome, Safari, Edge */
+    &::-webkit-scrollbar {
+      display: none;
+    }
+    /* Firefox */
+    scrollbar-width: none;
+    /* IE/Edge cũ */
+    -ms-overflow-style: none;
   }
 }

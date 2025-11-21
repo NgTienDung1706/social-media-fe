@@ -103,28 +103,29 @@ function Profile({ isOwnProfile = true, profileData = null }) {
   };
 
   return (
-    <div className="w-full min-h-screen bg-white flex flex-row justify-center gap-8">
+    <div className="w-full min-h-screen bg-white flex flex-col lg:flex-row lg:justify-center lg:gap-8">
       {/* Left: Profile Card */}
-      <div className="w-[350px]">
-        <StickyBox offsetTop={40} offsetBottom={20}>
-          <div className="bg-white rounded-2xl shadow-lg p-6 flex flex-col items-start">
-            {/* <div className="absolute -inset-[2px] rounded-2xl bg-gradient-to-r from-brand-green to-brand-blue blur-lg opacity-40 -z-10"></div> */}
-            <div className="w-32 h-32 rounded-full bg-brand-green flex items-center justify-center relative mb-2 self-center">
+      <div className="w-full lg:w-[350px]">
+        <StickyBox offsetTop={20} offsetBottom={20}>
+          <div className="bg-white rounded-2xl shadow-lg p-4 sm:p-6 flex flex-col items-start">
+            <div className="w-24 h-24 sm:w-32 sm:h-32 rounded-full bg-brand-green flex items-center justify-center relative mb-2 self-center">
               <img
                 src={profile.profile.avatar || defaultavatar}
                 alt="Avatar"
-                className="w-32 h-32 rounded-full object-cover border-4 border-white shadow"
+                className="w-24 h-24 sm:w-32 sm:h-32 rounded-full object-cover border-4 border-white shadow"
               />
-              <span className="absolute bottom-2 right-2 w-5 h-5 bg-green-500 border-2 border-white rounded-full"></span>
+              <span className="absolute bottom-0 right-0 w-4 h-4 sm:w-5 sm:h-5 bg-green-500 border-2 border-white rounded-full"></span>
             </div>
-            <div className="text-xl font-bold mb-5 mt-2 text-center self-center">{`${
-              profile?.profile?.lastname || ""
-            } ${profile?.profile?.firstname || ""}`}</div>
+            <div className="text-lg sm:text-xl font-bold mb-4 sm:mb-5 mt-2 text-center self-center">
+              {`${profile?.profile?.lastname || ""} ${
+                profile?.profile?.firstname || ""
+              }`}
+            </div>
 
             {/* Thống kê số bài viết, số bạn bè */}
-            <div className="flex w-full mb-4 mt-2 px-6">
+            <div className="flex w-full mb-4 mt-2 px-4 sm:px-6">
               <div className="flex-1 flex flex-col items-center">
-                <span className="text-lg font-bold text-gray-800">
+                <span className="text-base sm:text-lg font-bold text-gray-800">
                   {profile.postCount ?? 0}
                 </span>
                 <span className="text-xs text-gray-500 font-semibold">
@@ -133,14 +134,14 @@ function Profile({ isOwnProfile = true, profileData = null }) {
               </div>
               <div className="flex-1 flex flex-col items-center cursor-pointer">
                 <span
-                  className="text-lg font-bold text-gray-800"
-                  onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+                  className="text-base sm:text-lg font-bold text-gray-800"
+                  onClick={() => setShowFollowerList(true)}
                 >
                   {profile.followerCount ?? 0}
                 </span>
                 <span
                   className="text-xs text-gray-500 font-semibold"
-                  onClick={() => setShowFollowerList(true)} // mở FollowerList khi click
+                  onClick={() => setShowFollowerList(true)}
                 >
                   Người theo dõi
                 </span>
@@ -148,47 +149,60 @@ function Profile({ isOwnProfile = true, profileData = null }) {
 
               <div className="flex-1 flex flex-col items-center cursor-pointer">
                 <span
-                  className="text-lg font-bold text-gray-800"
-                  onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+                  className="text-base sm:text-lg font-bold text-gray-800"
+                  onClick={() => setShowFollowingList(true)}
                 >
                   {profile.followingCount ?? 0}
                 </span>
                 <span
                   className="text-xs text-gray-500 font-semibold"
-                  onClick={() => setShowFollowingList(true)} // mở FollowingList khi click
+                  onClick={() => setShowFollowingList(true)}
                 >
                   Đang theo dõi
                 </span>
               </div>
             </div>
 
-            <div className="flex items-center gap-2 mb-2">
-              <div className="text-gray-500 text-sm">{profile.username}</div>
+            <div className="flex items-center gap-2 mb-2 w-full">
+              <div className="text-gray-500 text-sm truncate flex-1">
+                {profile.username}
+              </div>
               {/* Icon giới tính */}
-              <div className="mb-2">
+              <div className="mb-2 flex-shrink-0">
                 {profile.profile.gender === "male" && (
-                  <span title="Nam" className="text-blue-500 text-lg">
+                  <span
+                    title="Nam"
+                    className="text-blue-500 text-base sm:text-lg"
+                  >
                     ♂️
                   </span>
                 )}
                 {profile.profile.gender === "female" && (
-                  <span title="Nữ" className="text-pink-500 text-lg">
+                  <span
+                    title="Nữ"
+                    className="text-pink-500 text-base sm:text-lg"
+                  >
                     ♀️
                   </span>
                 )}
                 {(!profile.profile.gender ||
                   (profile.profile.gender !== "male" &&
                     profile.profile.gender !== "female")) && (
-                  <span title="Khác" className="text-gray-400 text-lg">
+                  <span
+                    title="Khác"
+                    className="text-gray-400 text-base sm:text-lg"
+                  >
                     ⚧️
                   </span>
                 )}
               </div>
             </div>
-            <div className="flex gap-2 mb-4 justify-between w-full">
+            <div className="flex flex-col sm:flex-row gap-2 mb-4 w-full">
+              {" "}
+              {/* SỬA: Stack buttons trên mobile, row trên sm */}
               {isOwnProfile ? (
                 <button
-                  className="flex items-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium"
+                  className="flex items-center justify-center gap-1 px-3 py-1 bg-white border border-gray-300 rounded-lg text-gray-700 hover:bg-gray-100 text-sm font-medium w-full sm:w-auto"
                   onClick={() =>
                     navigate("/edit-profile", {
                       state: {
@@ -206,15 +220,23 @@ function Profile({ isOwnProfile = true, profileData = null }) {
                 </button>
               ) : (
                 <>
-                  <button className="flex items-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium">
+                  <button className="flex items-center justify-center gap-1 px-3 py-1 bg-blue-500 text-white rounded-lg text-sm font-medium flex-1 sm:w-auto">
+                    {" "}
+                    {/* SỬA: Flex trên mobile */}
                     Kết bạn
                   </button>
-                  <button className="flex items-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium">
+                  <button className="flex items-center justify-center gap-1 px-3 py-1 bg-gray-200 text-gray-700 rounded-lg text-sm font-medium flex-1 sm:w-auto">
+                    {" "}
+                    {/* SỬA: Flex trên mobile */}
                     Nhắn tin
                   </button>
                 </>
               )}
-              <OptionsMenu options={profileOptions} />
+              <div className="flex-shrink-0">
+                {" "}
+                {/* SỬA: OptionsMenu không co */}
+                <OptionsMenu options={profileOptions} />
+              </div>
             </div>
 
             <div className="text-xs text-gray-400 mb-2">Ngày Sinh</div>
@@ -237,35 +259,52 @@ function Profile({ isOwnProfile = true, profileData = null }) {
         </StickyBox>
       </div>
       {/* Right: Activity & Connections */}
-      <div className="flex-1 bg-white rounded-2xl shadow-lg p-8 flex flex-col h-auto justify-center">
+      <div className="flex-1 bg-white rounded-2xl shadow-lg p-4 sm:p-6 lg:p-8 flex flex-col h-auto justify-center min-h-[50vh]">
+        {" "}
+        {/* SỬA: Giảm padding, thêm min-h trên mobile */}
         {/* Tabs */}
-        <div className="bg-white text-black p-2 relative">
-          <div className="flex justify-around">
+        <div className="bg-white text-black p-2 relative rounded-t-lg overflow-hidden">
+          {" "}
+          {/* SỬA: Thêm rounded-t-lg và overflow-hidden để đẹp hơn trên mobile */}
+          <div className="flex flex-col sm:flex-row sm:justify-around">
+            {" "}
+            {/* SỬA: Stack tabs trên mobile, row trên sm */}
             <button
-              className={`relative p-2 flex font-semibold items-center justify-center gap-1 transition-colors duration-300 w-full ${
-                tab === "posts" ? "text-black" : "text-gray-600"
+              className={`relative p-3 sm:p-2 flex font-semibold items-center justify-center gap-1 transition-all duration-300 border-b sm:border-b-0 w-full sm:w-auto ${
+                tab === "posts"
+                  ? "text-black border-brand-green"
+                  : "text-gray-600 border-gray-200" // SỬA: Border bottom cho active/non-active trên mobile, transition-all cho mượt
               }`}
               onClick={() => setTab("posts")}
               onMouseEnter={() => setHoverTab("posts")}
               onMouseLeave={() => setHoverTab(null)}
               title="Post"
             >
-              <FaBorderAll className="text-lg" /> Bài viết
+              <FaBorderAll className="text-xl sm:text-lg flex-shrink-0" />{" "}
+              {/* SỬA: Icon lớn hơn một chút trên mobile */}
+              <span className="hidden sm:inline">Bài viết</span>{" "}
+              {/* SỬA: Ẩn text tab trên mobile để gọn */}
             </button>
             <button
-              className={`relative p-2 flex font-semibold items-center justify-center gap-1 transition-colors duration-300 w-full ${
-                tab === "saved" ? "text-black" : "text-gray-600"
+              className={`relative p-3 sm:p-2 flex font-semibold items-center justify-center gap-1 transition-all duration-300 border-b sm:border-b-0 w-full sm:w-auto ${
+                tab === "saved"
+                  ? "text-black border-brand-green"
+                  : "text-gray-600 border-gray-200" // SỬA: Border bottom cho active/non-active trên mobile, transition-all cho mượt
               }`}
               onClick={() => setTab("saved")}
               onMouseEnter={() => setHoverTab("saved")}
               onMouseLeave={() => setHoverTab(null)}
               title="Đã lưu"
             >
-              <FaBookmark className="text-lg" /> Đã lưu
+              <FaBookmark className="text-xl sm:text-lg flex-shrink-0" />{" "}
+              {/* SỬA: Icon lớn hơn một chút trên mobile */}
+              <span className="hidden sm:inline">Đã lưu</span>{" "}
+              {/* SỬA: Ẩn text tab trên mobile để gọn */}
             </button>
           </div>
+          {/* SỬA: Ẩn indicator trên mobile, chỉ hiển thị trên sm+ */}
           <div
-            className="absolute bottom-0 h-1 bg-gradient-to-r from-brand-green to-brand-blue transition-all duration-300 ease-in-out rounded-full"
+            className="hidden sm:block absolute bottom-0 h-1 bg-gradient-to-r from-brand-green to-brand-blue transition-all duration-300 ease-in-out rounded-full"
             style={{
               left: getTabPosition().left,
               width: getTabPosition().width,

@@ -57,9 +57,10 @@ function AppRouter() {
           <Route element={<MainLayout sidebar={<AppSidebar />} />}>
             <Route path="/profile" element={<Profile />} />
             <Route path="/profile/:username" element={<ProfileActivity />} />
-            <Route path="/messenger" element={<Messenger />} />
             <Route path="/explore" element={<Explore />} />
           </Route>
+
+          <Route path="/messenger" element={<Messenger />} />
         </Route>
 
         {/* Catch-all */}

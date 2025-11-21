@@ -2,13 +2,10 @@ import {
   FaHome,
   FaSearch,
   FaCompass,
-  FaVideo,
   FaFacebookMessenger,
   FaHeart,
   FaPlusSquare,
   FaUser,
-  FaRobot,
-  FaCogs,
 } from "react-icons/fa";
 import logo from "@/assets/Cham_bochu.png";
 import logo2 from "@/assets/logo_cham.png";
@@ -155,7 +152,7 @@ function AppSidebar() {
         className={`hidden md:flex flex-col gap-2 fixed top-0 left-0 h-screen 
         bg-white border-r border-gray-200 py-4 px-2 z-40 
         transition-all duration-300 
-        w-16 md:w-20 xl:w-64`}
+        w-16 md:w-20 xl:w-20`}
       >
         <div
           className={`mb-6 py-3 flex items-center justify-center cursor-pointer h-20 
@@ -164,18 +161,9 @@ function AppSidebar() {
         } transition-all duration-300`}
           onClick={() => handleNavigate("home", "/home")}
         >
-          {/* Logo lớn */}
-          <span
-            className={`font-logo text-3xl ${
-              isPopupOpen ? "hidden" : "hidden xl:inline"
-            }`}
-          >
-            <img src={logo2} alt="CHẠM" className="w-20 h-auto mx-auto" />
-          </span>
           {/* Logo nhỏ */}
           <span
             className={`font-logo text-3xl items-center justify-center 
-          ${isPopupOpen ? "inline-flex" : "xl:hidden"} 
           w-auto max-w-fit shrink-0`}
           >
             <img src={logo} alt="CHẠM" className="w-10 h-auto" />
@@ -188,12 +176,6 @@ function AppSidebar() {
           onClick={() => handleNavigate("home", "/home")}
         >
           <FaHome className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Trang chủ
-          </span>
         </button>
         <button
           type="button"
@@ -201,13 +183,6 @@ function AppSidebar() {
           className={itemClass("search")}
         >
           <FaSearch className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-              
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Tìm kiếm
-          </span>
         </button>
         <button
           type="button"
@@ -215,13 +190,6 @@ function AppSidebar() {
           onClick={() => handleNavigate("explore", "/explore")}
         >
           <FaCompass className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-              
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Khám phá
-          </span>
         </button>
         <button
           type="button"
@@ -229,13 +197,6 @@ function AppSidebar() {
           onClick={() => handleNavigate("messenger", "/messenger")}
         >
           <FaFacebookMessenger className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-              
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Tin nhắn
-          </span>
         </button>
         <button
           type="button"
@@ -243,13 +204,6 @@ function AppSidebar() {
           onClick={handleOpenNotifications}
         >
           <FaHeart className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-             
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Thông báo
-          </span>
         </button>
         <button
           type="button"
@@ -257,13 +211,6 @@ function AppSidebar() {
           onClick={handleOpenCreate}
         >
           <FaPlusSquare className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-             
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Tạo
-          </span>
         </button>
         <button
           type="button"
@@ -271,13 +218,6 @@ function AppSidebar() {
           onClick={() => handleNavigate("profile", "/profile")}
         >
           <FaUser className="text-2xl" />
-          <span
-            className={`transition-all duration-300 ease-in-out
-              
-              ${isPopupOpen ? "hidden" : "hidden xl:inline"}`}
-          >
-            Trang cá nhân
-          </span>
         </button>
         {/* <button
           type="button"

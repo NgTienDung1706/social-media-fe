@@ -1,12 +1,27 @@
+import React, { useState } from "react";
+import AppSidebarMin from "@/components/AppSidebarMin";
+import MessagesSidebar from "@/features/message/components/MessagesSidebar";
+import ChatArea from "@/features/message/components/ChatArea";
 
 function Messenger() {
+  const [activeConversationId, setActiveConversationId] = useState(null);
+
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">Tin nhắn</h1>
-      <div className="bg-white rounded-lg shadow p-4">
-        <p>Đây là trang tin nhắn. Bạn có thể phát triển thêm giao diện chat tại đây.</p>
+    <>
+      <AppSidebarMin />
+      <div className="flex h-screen bg-white ml-16 md:ml-20">
+        <div className="w-96 border-r border-gray-200">
+          <MessagesSidebar
+            onSelectConversation={setActiveConversationId}
+            activeId={activeConversationId}
+          />
+        </div>
+
+        <div className="flex-1">
+          <ChatArea conversationId={activeConversationId} />
+        </div>
       </div>
-    </div>
+    </>
   );
 }
 

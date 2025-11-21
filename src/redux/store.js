@@ -1,6 +1,8 @@
 import { configureStore, combineReducers } from "@reduxjs/toolkit";
 import authReducer from "./authSlice";
 import userReducer from "./usersSlice";
+import chatReducer from "./chatSlice";
+import socketReducer from "./socketSlice";
 import {
   persistStore,
   persistReducer,
@@ -17,13 +19,15 @@ const persistConfig = {
   key: "root",
   storage,
   version: 1,
-  blacklist: ["users"], // không lưu slice này
+  blacklist: ["users", "chat"], // không lưu slice này
   // hoặc whitelist: ["auth", "settings"]
 };
 
 const rootReducer = combineReducers({
   auth: authReducer,
   users: userReducer,
+  chat: chatReducer,
+  socket: socketReducer,
 });
 
 const persistedReducer = persistReducer(persistConfig, rootReducer);
