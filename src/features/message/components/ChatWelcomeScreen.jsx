@@ -1,6 +1,6 @@
 import React from "react";
 
-function EmptyState() {
+function ChatWelcomeScreen() {
   return (
     <div className="flex flex-col items-center justify-center h-screen text-center text-gray-600 px-6">
       <div className="mb-6">
@@ -19,4 +19,4 @@ function EmptyState() {
   );
 }
 
-export default EmptyState;
+export default ChatWelcomeScreen;

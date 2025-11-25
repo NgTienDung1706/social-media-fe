@@ -31,4 +31,9 @@ body {
     /* IE/Edge cũ */
     -ms-overflow-style: none;
   }
+
+  .beautiful-scrollbar {
+    /* stylelint-disable-next-line at-rule-no-unknown */
+    @apply scrollbar-thin scrollbar-thumb-gray-400 scrollbar-track-transparent;
+  }
 }

@@ -18,3 +18,27 @@ export const getMessages = async (conversationId, cursor) => {
     cursor: res.nextCursor || null,
   };
 };
+
+export const sendDirectMessage = async (
+  recipientId,
+  content,
+  images,
+  conversationId
+) => {
+  const res = await axios.post("/message/direct", {
+    recipientId,
+    content,
+    images,
+    conversationId,
+  });
+  return res;
+};
+
+export const sendGroupMessage = async (conversationId, content, images) => {
+  const res = await axios.post("/message/group", {
+    conversationId,
+    content,
+    images,
+  });
+  return res;
+};

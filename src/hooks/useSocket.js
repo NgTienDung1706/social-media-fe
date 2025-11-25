@@ -1,61 +1,166 @@
-// src/hooks/useSocket.js (cập nhật phần useEffect)
+// src/hooks/useSocket.js
 import { useEffect, useRef } from "react";
 import { io } from "socket.io-client";
 import { useSelector, useDispatch } from "react-redux";
-import { setConnected, setOnlineUsers } from "@/redux/socketSlice.js"; // Import action
+
+import {
+  setConnected,
+  setOnlineUsers,
+  setSocketHelpers,
+} from "@/redux/socketSlice.js";
+
+import {
+  addMessage,
+  updateConversation,
+  fetchMessages,
+} from "@/redux/chatSlice.js";
 
 export const useSocket = () => {
   const socketRef = useRef(null);
   const dispatch = useDispatch();
+
+  // --- Actual Redux states ---
   const { accessToken } = useSelector((state) => state.auth.login);
+  const user = useSelector((state) => state.auth.login.currentUser);
+  const messages = useSelector((state) => state.chat.messages);
+  const activeConversationId = useSelector(
+    (state) => state.chat.activeConversationId
+  );
+
+  // --- Refs to avoid stale closure ---
+  const userRef = useRef(user);
+  const messagesRef = useRef(messages);
+  const activeRef = useRef(activeConversationId);
 
   useEffect(() => {
+    userRef.current = user;
+  }, [user]);
+
+  useEffect(() => {
+    messagesRef.current = messages;
+  }, [messages]);
+
+  useEffect(() => {
+    activeRef.current = activeConversationId;
+  }, [activeConversationId]);
+
+  // ===========================
+  // HANDLERS (stable – no deps)
+  // ===========================
+
+  const handleNewMessage = (payload) => {
+    const user = userRef.current;
+    const messages = messagesRef.current;
+
+    if (!user || !payload?.message || !payload?.conversation) return;
+
+    const { message, conversation, unreadCount } = payload;
+    const convoId = conversation._id;
+
+    const messagesNotLoaded = !messages[convoId]; // conversation chưa load
+
+    if (messagesNotLoaded) {
+      dispatch(fetchMessages({ conversationId: convoId }));
+    } else {
+      dispatch(addMessage({ message, userId: user._id }));
+    }
+
+    // Update conversation
+    const lastMessage = {
+      _id: message._id,
+      content: message.content,
+      images: message.images || [],
+      createdAt: message.createdAt,
+      senderId: message.senderId,
+    };
+
+    dispatch(
+      updateConversation({
+        ...conversation,
+        lastMessage,
+        unreadCount: unreadCount || conversation.unreadCount || {},
+      })
+    );
+
+    // Mark as read nếu đang ở trong cuộc trò chuyện đó
+    if (
+      convoId === activeRef.current &&
+      user._id.toString() !== message.senderId.toString()
+    ) {
+      console.log("hé lô bây bi");
+      socketRef.current?.emit("mark-as-read", { conversationId: convoId });
+    }
+  };
+
+  const handleMarkAsReadSuccess = (payload) => {
+    const { conversationId, unreadCount } = payload;
+    dispatch(
+      updateConversation({
+        _id: conversationId,
+        unreadCount: unreadCount || {},
+      })
+    );
+  };
+
+  const handleOnlineUsers = (userIds) => {
+    dispatch(setOnlineUsers(userIds));
+  };
+
+  // ===========================
+  // SOCKET INIT
+  // ===========================
+
+  useEffect(() => {
+    if (socketRef.current) {
+      socketRef.current.removeAllListeners();
+      socketRef.current.disconnect();
+      socketRef.current = null;
+    }
+
     if (!accessToken) {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-        dispatch(setConnected(false)); // Update Redux khi disconnect
-      }
+      dispatch(setConnected(false));
       return;
     }
 
-    socketRef.current = io("http://localhost:3001", {
+    // Create socket instance
+    const socket = io("http://localhost:3001", {
       withCredentials: true,
       auth: { token: accessToken },
     });
 
-    socketRef.current.on("connect", () => {
-      console.log("Socket connected:", socketRef.current.id);
-      dispatch(setConnected(true)); // Dispatch vào Redux
+    socketRef.current = socket;
+
+    dispatch(
+      setSocketHelpers({
+        markAsRead: (conversationId) =>
+          socketRef.current.emit("mark-as-read", { conversationId }),
+      })
+    );
+
+    // Listeners (stable)
+    socket.on("connect", () => {
+      console.log("Socket connected:", socket.id);
+      dispatch(setConnected(true));
     });
 
-    socketRef.current.on("disconnect", () => {
-      console.log("Socket disconnected");
+    socket.on("disconnect", () => {
       dispatch(setConnected(false));
     });
 
-    socketRef.current.on("connect_error", (error) => {
-      console.error("Connection error:", error);
-    });
+    socket.on("online-users", handleOnlineUsers);
+    socket.on("new-message", handleNewMessage);
+    socket.on("mark-as-read-success", handleMarkAsReadSuccess);
 
-    // Realtime: Lắng nghe sự kiện user online
-    socketRef.current.on("online-users", (userIds) => {
-      dispatch(setOnlineUsers(userIds));
-    });
-
-    // Listen global events ở đây nếu cần (e.g., notifications toàn app)
-    // socketRef.current.on('globalNotification', (data) => { /* handle */ });
-
+    // Cleanup on unmount or token change
     return () => {
-      if (socketRef.current) {
-        socketRef.current.disconnect();
-      }
+      socket.removeAllListeners();
+      socket.disconnect();
+      socketRef.current = null;
+      dispatch(setSocketHelpers(null));
     };
   }, [accessToken, dispatch]);
 
-  // Helper functions (giữ nguyên)
-  const joinRoom = (roomId) => socketRef.current?.emit("joinRoom", roomId);
-  const sendMessage = (data) => socketRef.current?.emit("sendMessage", data);
-  const startTyping = (data) => socketRef.current?.emit("typing", data);
-
-  return { socket: socketRef.current, joinRoom, sendMessage, startTyping };
+  return {
+    socket: socketRef.current,
+  };
 };

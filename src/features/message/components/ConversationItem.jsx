@@ -1,4 +1,5 @@
 import React from "react";
+import { useEffect } from "react";
 import { useSelector } from "react-redux";
 
 function ConversationItem({ item, active, onClick }) {
@@ -40,9 +41,10 @@ function ConversationItem({ item, active, onClick }) {
   }
 
   // Logic hiển thị lastMessage
-  const lastMessage = item.lastMessage;
+  const { lastMessage } = item;
   if (lastMessage) {
-    const isOwnMessage = lastMessage.senderId?._id === currentUser?._id; // Kiểm tra senderId có phải currentUser không
+    const senderId = lastMessage.senderId._id || lastMessage.senderId;
+    const isOwnMessage = senderId === currentUser?._id; // Kiểm tra senderId có phải currentUser không
     const hasImages = lastMessage.images && lastMessage.images.length > 0;
     const imageCount = hasImages ? lastMessage.images.length : 0;
     const content = lastMessage.content || "";
@@ -106,14 +108,14 @@ function ConversationItem({ item, active, onClick }) {
           <img
             src={displayAvatar}
             alt={displayName}
-            className="w-12 h-12 rounded-full object-cover"
+            className="w-14 h-14 rounded-full object-cover"
           />
           {isOnline && (
             <div className="absolute -bottom-1 right-1 w-3 h-3 rounded-full border-2 border-white bg-green-500" />
           )}
         </div>
         <div className="flex-1 min-w-0">
-          <div className={nameClass + " pb-1"}>{displayName}</div>
+          <div className={nameClass + " pb-2"}>{displayName}</div>
           <div className={lastMessageClass}>{displayLastMessage}</div>
         </div>
       </div>

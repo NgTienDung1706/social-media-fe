@@ -37,7 +37,17 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
+        ignoredActions: [
+          FLUSH,
+          REHYDRATE,
+          PAUSE,
+          PERSIST,
+          PURGE,
+          REGISTER,
+          "socket/setSocketHelpers",
+        ],
+        // Ignore path socket.socketHelpers (không check functions bên trong)
+        ignoredPaths: ["socket.socketHelpers"],
       },
     }),
 });

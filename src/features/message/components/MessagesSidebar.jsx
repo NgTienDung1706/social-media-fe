@@ -1,9 +1,8 @@
 import React, { useState, useRef, useEffect } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import ConversationItem from "@/features/message/components/ConversationItem";
-import { getConversations } from "@/features/message/messageApi";
-//import { ChevronDownIcon, PencilSquareIcon } from "@heroicons/react/24/outline";
+import { fetchConversations } from "@/redux/chatSlice";
 import { FaPlus } from "react-icons/fa";
-import { useSelector } from "react-redux";
 
 // Mock data cho ghi chú của bạn bè (tương tự MOCK_CONVERSATIONS, nhưng phù hợp horizontal)
 const MOCK_FRIENDS_NOTES = [
@@ -50,39 +49,25 @@ const MOCK_FRIENDS_NOTES = [
 ];
 
 function MessagesSidebar({ onSelectConversation, activeId }) {
+  const dispatch = useDispatch();
   const [q, setQ] = useState("");
-  const [items, setItems] = useState([]); // State cho conversations
   const [noteItems] = useState(MOCK_FRIENDS_NOTES); // State cho notes (không cần search riêng)
   //const debRef = useRef(null);
   const notesScrollRef = useRef(null); // Ref cho notes scroll container
   const me = useSelector((state) => state.auth.login.currentUser);
+  const conversations = useSelector((state) => state.chat.conversations || []);
 
-  // debounce search cho conversations
-  // useEffect(() => {
-  //   if (debRef.current) clearTimeout(debRef.current);
-  //   debRef.current = setTimeout(() => {
-  //     const v = q.trim().toLowerCase();
-  //     if (!v) {
-  //       setItems(MOCK_CONVERSATIONS);
-  //     } else {
-  //       setItems(
-  //         MOCK_CONVERSATIONS.filter((i) => i.name.toLowerCase().includes(v))
-  //       );
-  //     }
-  //   }, 250);
-  //   return () => clearTimeout(debRef.current);
-  // }, [q]);
   useEffect(() => {
-    const fetchConversations = async () => {
+    const getConversations = async () => {
       try {
-        const conversations = await getConversations();
-        setItems(conversations);
+        // Gọi action để fetch conversations
+        dispatch(fetchConversations());
       } catch (error) {
         console.error("Failed to fetch conversations:", error);
       }
     };
 
-    fetchConversations();
+    getConversations();
   }, []);
 
   // Hỗ trợ scroll ngang bằng chuột wheel
@@ -144,7 +129,7 @@ function MessagesSidebar({ onSelectConversation, activeId }) {
 
   return (
     <div
-      className="h-screen border-r border-gray-200 flex flex-col bg-white"
+      className="h-screen flex flex-col bg-white"
       style={{ width: "var(--sidebar-w)" }}
     >
       {/* Header với tên user và icon compose */}
@@ -238,12 +223,12 @@ function MessagesSidebar({ onSelectConversation, activeId }) {
       {/* Danh sách tin nhắn - "Your Note" là item đầu tiên */}
       <div className="flex-1 overflow-auto space-y-1">
         {/* Các conversation items còn lại */}
-        {items.map((item) => (
+        {conversations.map((conversation) => (
           <ConversationItem
-            key={item._id}
-            item={item}
+            key={conversation._id}
+            item={conversation}
             onClick={onSelectConversation}
-            active={activeId === item._id}
+            active={activeId === conversation._id}
           />
         ))}
       </div>
